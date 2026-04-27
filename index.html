@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partners Executive Projections</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+// ── FIREBASE ──────────────────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBxr6D15mCAsgh_p91SG9H5ulsZS9rjM_o",
+  authDomain:        "partners-forecast.firebaseapp.com",
+  projectId:         "partners-forecast",
+  storageBucket:     "partners-forecast.firebasestorage.app",
+  messagingSenderId: "395734240762",
+  appId:             "1:395734240762:web:85ad1e3ba58316ff04a843"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+const COLL  = "pm_snapshots";
+
+// Expose Firestore helpers to the global scope so non-module code can call them
+window._fb = {
+  async save(data){
+    return await addDoc(collection(db, COLL), { ...data, savedAt: serverTimestamp() });
+  },
+  async loadAll(){
+    const q = query(collection(db, COLL), orderBy("savedAt", "asc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+  },
+  async remove(id){
+    return await deleteDoc(doc(db, COLL, id));
+  }
+};
+
+// ── SEED DATA — pre-built historical snapshots ────────────────────
+const SEED_SNAPSHOTS = [
+  {
+    "snapStr": "May 22, 2024",
+    "month": "May",
+    "monthShort": "May",
+    "yr": 2024,
+    "mo": 5,
+    "unitsMTD": 17,
+    "volMTD": 6950980,
+    "locked": 10996015,
+    "coeIn": 0,
+    "coeLocks": 0,
+    "coeNext": 0,
+    "fundedCoe": 0,
+    "totalBD": 23,
+    "elBD": 16,
+    "remBD": 7,
+    "effRem": 7,
+    "nHols": 0,
+    "pctEl": 0.6957,
+    "vCon": 8992830,
+    "vBase": 9992034,
+    "vOpt": 10991237,
+    "uBase": 19,
+    "conv": null,
+    "actualVol": 8737227,
+    "actualUnits": 24,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "June 14, 2024",
+    "month": "June",
+    "monthShort": "Jun",
+    "yr": 2024,
+    "mo": 6,
+    "unitsMTD": 13,
+    "volMTD": 5782226,
+    "locked": 14829830,
+    "coeIn": 11238810,
+    "coeLocks": 0,
+    "coeNext": 0,
+    "fundedCoe": 17021036,
+    "totalBD": 20,
+    "elBD": 10,
+    "remBD": 10,
+    "effRem": 10,
+    "nHols": 0,
+    "pctEl": 0.5,
+    "vCon": 14467881,
+    "vBase": 17021036,
+    "vOpt": 17872088,
+    "uBase": 33,
+    "conv": null,
+    "actualVol": 15132106,
+    "actualUnits": 28,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "July 23, 2024",
+    "month": "July",
+    "monthShort": "Jul",
+    "yr": 2024,
+    "mo": 7,
+    "unitsMTD": 14,
+    "volMTD": 7172700,
+    "locked": 16249109,
+    "coeIn": 6556610,
+    "coeLocks": 0,
+    "coeNext": 0,
+    "fundedCoe": 13729310,
+    "totalBD": 23,
+    "elBD": 17,
+    "remBD": 6,
+    "effRem": 6,
+    "nHols": 0,
+    "pctEl": 0.7391,
+    "vCon": 11669914,
+    "vBase": 13729310,
+    "vOpt": 14415776,
+    "uBase": 26,
+    "conv": null,
+    "actualVol": 12644716,
+    "actualUnits": 29,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "August 12, 2024",
+    "month": "August",
+    "monthShort": "Aug",
+    "yr": 2024,
+    "mo": 8,
+    "unitsMTD": 14,
+    "volMTD": 5865030,
+    "locked": 15299252,
+    "coeIn": 16156665,
+    "coeLocks": 0,
+    "coeNext": 0,
+    "fundedCoe": 22021695,
+    "totalBD": 22,
+    "elBD": 8,
+    "remBD": 14,
+    "effRem": 14,
+    "nHols": 0,
+    "pctEl": 0.3636,
+    "vCon": 18718441,
+    "vBase": 22021695,
+    "vOpt": 23122780,
+    "uBase": 42,
+    "conv": null,
+    "actualVol": 12602992,
+    "actualUnits": 33,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "September 10, 2024",
+    "month": "September",
+    "monthShort": "Sep",
+    "yr": 2024,
+    "mo": 9,
+    "unitsMTD": 8,
+    "volMTD": 3497459,
+    "locked": 13290431,
+    "coeIn": 15448195,
+    "coeLocks": 0,
+    "coeNext": 806392,
+    "fundedCoe": 18945654,
+    "totalBD": 20,
+    "elBD": 6,
+    "remBD": 14,
+    "effRem": 14,
+    "nHols": 0,
+    "pctEl": 0.3,
+    "vCon": 16103806,
+    "vBase": 18945654,
+    "vOpt": 19892937,
+    "uBase": 36,
+    "conv": null,
+    "actualVol": 15633933,
+    "actualUnits": 31,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "October 15, 2024",
+    "month": "October",
+    "monthShort": "Oct",
+    "yr": 2024,
+    "mo": 10,
+    "unitsMTD": 21,
+    "volMTD": 7882842,
+    "locked": 0,
+    "coeIn": 0,
+    "coeLocks": 0,
+    "coeNext": 0,
+    "fundedCoe": 0,
+    "totalBD": 22,
+    "elBD": 10,
+    "remBD": 12,
+    "effRem": 12,
+    "nHols": 0,
+    "pctEl": 0.4545,
+    "vCon": 15608027,
+    "vBase": 17342252,
+    "vOpt": 19076478,
+    "uBase": 33,
+    "conv": null,
+    "actualVol": 19490027,
+    "actualUnits": 42,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "November 15, 2024",
+    "month": "November",
+    "monthShort": "Nov",
+    "yr": 2024,
+    "mo": 11,
+    "unitsMTD": 16,
+    "volMTD": 7748262,
+    "locked": 8247550,
+    "coeIn": 9139387,
+    "coeLocks": 0,
+    "coeNext": 7327601,
+    "fundedCoe": 16887649,
+    "totalBD": 19,
+    "elBD": 10,
+    "remBD": 9,
+    "effRem": 8,
+    "nHols": 1,
+    "pctEl": 0.5263,
+    "vCon": 14354502,
+    "vBase": 16887649,
+    "vOpt": 17732031,
+    "uBase": 32,
+    "conv": null,
+    "actualVol": 24685408,
+    "actualUnits": 53,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "December 16, 2024",
+    "month": "December",
+    "monthShort": "Dec",
+    "yr": 2024,
+    "mo": 12,
+    "unitsMTD": 14,
+    "volMTD": 7218469,
+    "locked": 12097746,
+    "coeIn": 15081196,
+    "coeLocks": 0,
+    "coeNext": 3446896,
+    "fundedCoe": 22299665,
+    "totalBD": 21,
+    "elBD": 11,
+    "remBD": 10,
+    "effRem": 9,
+    "nHols": 1,
+    "pctEl": 0.5238,
+    "vCon": 18954715,
+    "vBase": 22299665,
+    "vOpt": 23414648,
+    "uBase": 43,
+    "conv": null,
+    "actualVol": 27649189,
+    "actualUnits": 60,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "January 13, 2025",
+    "month": "January",
+    "monthShort": "Jan",
+    "yr": 2025,
+    "mo": 1,
+    "unitsMTD": 10,
+    "volMTD": 5983250,
+    "locked": 5599771,
+    "coeIn": 6533648,
+    "coeLocks": 0,
+    "coeNext": 2054930,
+    "fundedCoe": 12516898,
+    "totalBD": 21,
+    "elBD": 8,
+    "remBD": 13,
+    "effRem": 12,
+    "nHols": 1,
+    "pctEl": 0.381,
+    "vCon": 10639363,
+    "vBase": 12516898,
+    "vOpt": 13142743,
+    "uBase": 24,
+    "conv": null,
+    "actualVol": 14851781,
+    "actualUnits": 32,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "February 18, 2025",
+    "month": "February",
+    "monthShort": "Feb",
+    "yr": 2025,
+    "mo": 2,
+    "unitsMTD": 16,
+    "volMTD": 5263600,
+    "locked": 20945293,
+    "coeIn": 16706019,
+    "coeLocks": 0,
+    "coeNext": 10989319,
+    "fundedCoe": 21969619,
+    "totalBD": 19,
+    "elBD": 11,
+    "remBD": 8,
+    "effRem": 8,
+    "nHols": 0,
+    "pctEl": 0.5789,
+    "vCon": 18674176,
+    "vBase": 21969619,
+    "vOpt": 23068100,
+    "uBase": 42,
+    "conv": null,
+    "actualVol": 12796368,
+    "actualUnits": 34,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "March 18, 2025",
+    "month": "March",
+    "monthShort": "Mar",
+    "yr": 2025,
+    "mo": 3,
+    "unitsMTD": 22,
+    "volMTD": 9419463,
+    "locked": 32883075,
+    "coeIn": 22802693,
+    "coeLocks": 0,
+    "coeNext": 8159555,
+    "fundedCoe": 32222156,
+    "totalBD": 21,
+    "elBD": 12,
+    "remBD": 9,
+    "effRem": 9,
+    "nHols": 0,
+    "pctEl": 0.5714,
+    "vCon": 27388833,
+    "vBase": 32222156,
+    "vOpt": 33833264,
+    "uBase": 62,
+    "conv": null,
+    "actualVol": 19490027,
+    "actualUnits": 42,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "April 15, 2025",
+    "month": "April",
+    "monthShort": "Apr",
+    "yr": 2025,
+    "mo": 4,
+    "unitsMTD": 18,
+    "volMTD": 9790100,
+    "locked": 34444844,
+    "coeIn": 26071189,
+    "coeLocks": 0,
+    "coeNext": 8577270,
+    "fundedCoe": 35861289,
+    "totalBD": 22,
+    "elBD": 11,
+    "remBD": 11,
+    "effRem": 11,
+    "nHols": 0,
+    "pctEl": 0.5,
+    "vCon": 30482096,
+    "vBase": 35861289,
+    "vOpt": 37654353,
+    "uBase": 69,
+    "conv": null,
+    "actualVol": 24685408,
+    "actualUnits": 53,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "May 14, 2025",
+    "month": "May",
+    "monthShort": "May",
+    "yr": 2025,
+    "mo": 5,
+    "unitsMTD": 26,
+    "volMTD": 12111732,
+    "locked": 29628678,
+    "coeIn": 25940980,
+    "coeLocks": 0,
+    "coeNext": 9112703,
+    "fundedCoe": 38052712,
+    "totalBD": 21,
+    "elBD": 10,
+    "remBD": 11,
+    "effRem": 10,
+    "nHols": 1,
+    "pctEl": 0.4762,
+    "vCon": 32344805,
+    "vBase": 38052712,
+    "vOpt": 39955348,
+    "uBase": 73,
+    "conv": null,
+    "actualVol": 27649189,
+    "actualUnits": 60,
+    "partial": true,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "June 13, 2025",
+    "month": "June",
+    "monthShort": "Jun",
+    "yr": 2025,
+    "mo": 6,
+    "unitsMTD": 21,
+    "volMTD": 8272375,
+    "locked": 31904469,
+    "coeIn": 29682335,
+    "coeLocks": 22344513,
+    "coeNext": 5175926,
+    "fundedCoe": 37954710,
+    "totalBD": 20,
+    "elBD": 10,
+    "remBD": 10,
+    "effRem": 9,
+    "nHols": 1,
+    "pctEl": 0.5,
+    "vCon": 23967161,
+    "vBase": 26167076,
+    "vOpt": 26500396,
+    "uBase": 50,
+    "conv": 0.7024,
+    "actualVol": 25392978,
+    "actualUnits": 57,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "July 16, 2025",
+    "month": "July",
+    "monthShort": "Jul",
+    "yr": 2025,
+    "mo": 7,
+    "unitsMTD": 19,
+    "volMTD": 9943506,
+    "locked": 27212250,
+    "coeIn": 21383614,
+    "coeLocks": 17588415,
+    "coeNext": 6482635,
+    "fundedCoe": 31327120,
+    "totalBD": 22,
+    "elBD": 11,
+    "remBD": 11,
+    "effRem": 11,
+    "nHols": 0,
+    "pctEl": 0.5,
+    "vCon": 25153967,
+    "vBase": 26554859,
+    "vOpt": 27429154,
+    "uBase": 51,
+    "conv": 0.8648,
+    "actualVol": 23177031,
+    "actualUnits": 51,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "August 14, 2025",
+    "month": "August",
+    "monthShort": "Aug",
+    "yr": 2025,
+    "mo": 8,
+    "unitsMTD": 13,
+    "volMTD": 5772135,
+    "locked": 25045694,
+    "coeIn": 19162072,
+    "coeLocks": 11953713,
+    "coeNext": 9183925,
+    "fundedCoe": 24934207,
+    "totalBD": 21,
+    "elBD": 10,
+    "remBD": 11,
+    "effRem": 11,
+    "nHols": 0,
+    "pctEl": 0.4762,
+    "vCon": 16109706,
+    "vBase": 18770470,
+    "vOpt": 19653013,
+    "uBase": 36,
+    "conv": 0.8648,
+    "actualVol": 17902434,
+    "actualUnits": 43,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "September 15, 2025",
+    "month": "September",
+    "monthShort": "Sep",
+    "yr": 2025,
+    "mo": 9,
+    "unitsMTD": 24,
+    "volMTD": 12995065,
+    "locked": 26671179,
+    "coeIn": 26661662,
+    "coeLocks": 18538204,
+    "coeNext": 6820650,
+    "fundedCoe": 39656727,
+    "totalBD": 21,
+    "elBD": 10,
+    "remBD": 11,
+    "effRem": 11,
+    "nHols": 0,
+    "pctEl": 0.4762,
+    "vCon": 29026904,
+    "vBase": 32025450,
+    "vOpt": 32026878,
+    "uBase": 62,
+    "conv": 0.8648,
+    "actualVol": 30626310,
+    "actualUnits": 59,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "October 16, 2025",
+    "month": "October",
+    "monthShort": "Oct",
+    "yr": 2025,
+    "mo": 10,
+    "unitsMTD": 33,
+    "volMTD": 14459374,
+    "locked": 29859396,
+    "coeIn": 28435295,
+    "coeLocks": 20000295,
+    "coeNext": 10906590,
+    "fundedCoe": 42894669,
+    "totalBD": 22,
+    "elBD": 11,
+    "remBD": 11,
+    "effRem": 11,
+    "nHols": 0,
+    "pctEl": 0.5,
+    "vCon": 31755629,
+    "vBase": 34869173,
+    "vOpt": 35082788,
+    "uBase": 67,
+    "conv": 0.8648,
+    "actualVol": 32536279,
+    "actualUnits": 71,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "November 14, 2025",
+    "month": "November",
+    "monthShort": "Nov",
+    "yr": 2025,
+    "mo": 11,
+    "unitsMTD": 18,
+    "volMTD": 8527195,
+    "locked": 36690700,
+    "coeIn": 41736345,
+    "coeLocks": 27079495,
+    "coeNext": 9770504,
+    "fundedCoe": 50263540,
+    "totalBD": 18,
+    "elBD": 9,
+    "remBD": 9,
+    "effRem": 8,
+    "nHols": 1,
+    "pctEl": 0.5,
+    "vCon": 25348977,
+    "vBase": 29235187,
+    "vOpt": 29235187,
+    "uBase": 56,
+    "conv": 0.6212,
+    "actualVol": 25849466,
+    "actualUnits": 56,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "December 12, 2025",
+    "month": "December",
+    "monthShort": "Dec",
+    "yr": 2025,
+    "mo": 12,
+    "unitsMTD": 22,
+    "volMTD": 9671727,
+    "locked": 29750668,
+    "coeIn": 36072584,
+    "coeLocks": 24502392,
+    "coeNext": 3481690,
+    "fundedCoe": 45744311,
+    "totalBD": 22,
+    "elBD": 10,
+    "remBD": 12,
+    "effRem": 11,
+    "nHols": 1,
+    "pctEl": 0.4545,
+    "vCon": 30861396,
+    "vBase": 35132207,
+    "vOpt": 35132207,
+    "uBase": 68,
+    "conv": 0.8648,
+    "actualVol": 27774596,
+    "actualUnits": 68,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "January 15, 2026",
+    "month": "January",
+    "monthShort": "Jan",
+    "yr": 2026,
+    "mo": 1,
+    "unitsMTD": 19,
+    "volMTD": 9571366,
+    "locked": 29515927,
+    "coeIn": 28171078,
+    "coeLocks": 19094937,
+    "coeNext": 10364629,
+    "fundedCoe": 37742444,
+    "totalBD": 20,
+    "elBD": 10,
+    "remBD": 10,
+    "effRem": 9,
+    "nHols": 1,
+    "pctEl": 0.5,
+    "vCon": 22983650,
+    "vBase": 25704721,
+    "vOpt": 25906448,
+    "uBase": 49,
+    "conv": 0.7024,
+    "actualVol": 22801408,
+    "actualUnits": 45,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "February 12, 2026",
+    "month": "February",
+    "monthShort": "Feb",
+    "yr": 2026,
+    "mo": 2,
+    "unitsMTD": 26,
+    "volMTD": 14391392,
+    "locked": 35223335,
+    "coeIn": 36368256,
+    "coeLocks": 29989114,
+    "coeNext": 5394349,
+    "fundedCoe": 50759648,
+    "totalBD": 19,
+    "elBD": 9,
+    "remBD": 10,
+    "effRem": 9,
+    "nHols": 1,
+    "pctEl": 0.4737,
+    "vCon": 35455746,
+    "vBase": 37368244,
+    "vOpt": 37368244,
+    "uBase": 72,
+    "conv": 0.7024,
+    "actualVol": 32949251,
+    "actualUnits": 68,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  },
+  {
+    "snapStr": "March 16, 2026",
+    "month": "March",
+    "monthShort": "Mar",
+    "yr": 2026,
+    "mo": 3,
+    "unitsMTD": 30,
+    "volMTD": 13899200,
+    "locked": 39715504,
+    "coeIn": 38317379,
+    "coeLocks": 27970679,
+    "coeNext": 9009575,
+    "fundedCoe": 52216579,
+    "totalBD": 22,
+    "elBD": 11,
+    "remBD": 11,
+    "effRem": 11,
+    "nHols": 0,
+    "pctEl": 0.5,
+    "vCon": 38088243,
+    "vBase": 41907437,
+    "vOpt": 42117156,
+    "uBase": 81,
+    "conv": 0.8648,
+    "actualVol": 37244738,
+    "actualUnits": 76,
+    "partial": false,
+    "_seeded": true,
+    "_historical": true
+  }
+];
+
+async function seedHistoricalSnapshots(existingSnaps){
+  // Only seed records that aren't already in Firestore (match by snapStr)
+  const existingDates = new Set(existingSnaps.map(s => s.snapStr));
+  const toSeed = SEED_SNAPSHOTS.filter(s => !existingDates.has(s.snapStr));
+  for(const snap of toSeed){
+    try{
+      const ref = await window._fb.save(snap);
+      existingSnaps.push({ _id: ref.id, ...snap });
+      console.log('Seeded historical snapshot:', snap.snapStr);
+    } catch(err){
+      console.warn('Seed failed for', snap.snapStr, err.message);
+    }
+  }
+  // Sort by yr/mo/elBD so order is correct
+  // Sort: historical first by date, then live snapshots by date
+  existingSnaps.sort((a,b) => {
+    // historical before live within same month
+    if(a._historical && !b._historical) return -1;
+    if(!a._historical && b._historical) return 1;
+    return (a.yr*10000 + a.mo*100 + (a.elBD||0)) - (b.yr*10000 + b.mo*100 + (b.elBD||0));
+  });
+  return existingSnaps;
+}
+
+// Auto-load on page open — pull all snapshots, seed historical if needed, render latest on dashboard
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    window._fb.loadAll()
+      .then(async snaps => {
+        // Seed Feb/Mar historical snapshots if not already saved
+        snaps = await seedHistoricalSnapshots(snaps);
+        window._remoteSnaps = snaps;
+        updateHistCount();
+        if(snaps.length > 0){
+          // Render the most recent snapshot onto the dashboard automatically
+          const latest = snaps[snaps.length - 1];
+          renderFromSnapshot(latest);
+        }
+      })
+      .catch(err => console.warn('Firebase load failed:', err.message));
+  }, 600);
+});
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:#00818D;--teal-dark:#005f69;--teal-light:#e0f4f6;--teal-mid:#b3e0e4;
+  --warm:#8A7E78;--warm-light:#f2efed;--navy:#1a2b3c;
+  --gold:#FFAC27;--gold-light:#fff4e0;
+  --green:#1a7a4a;--green-light:#e6f7ee;
+  --red:#c0392b;--red-light:#fdecea;
+  --white:#ffffff;--off-white:#f8f9fa;--border:#e4e8ed;
+  --text:#1a2b3c;--text-muted:#6b7a8a;--text-light:#9aa6b2;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:#f0f3f7;color:var(--text);min-height:100vh;}
+
+/* HEADER */
+.page-header{background:var(--navy);position:relative;overflow:hidden;}
+.page-header::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--teal-dark) 0%,var(--navy) 55%);opacity:.9;}
+.header-inner{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:22px 32px 18px;display:flex;align-items:center;justify-content:space-between;}
+.header-left{display:flex;align-items:center;gap:20px;}
+.header-title{border-left:1px solid rgba(255,255,255,.2);padding-left:20px;}
+.header-title .eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+.header-title h1{font-family:'Lora',serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px;line-height:1.1;}
+.header-right{text-align:right;}
+.hdr-snap-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:3px;}
+.hdr-snap-date{font-size:15px;font-weight:700;color:#fff;}
+.hdr-bd-status{font-size:11px;color:var(--gold);margin-top:3px;font-weight:500;}
+
+/* UPLOAD */
+.upload-zone{max-width:1280px;margin:0 auto;padding:28px 32px 0;}
+.upload-box{border:2px dashed var(--teal-mid);border-radius:14px;background:var(--white);padding:48px 32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;}
+.upload-box:hover,.upload-box.drag-over{border-color:var(--teal);background:var(--teal-light);}
+.upload-box.has-file{border-color:var(--green);border-style:solid;background:var(--green-light);padding:18px 32px;}
+.upload-box input{display:none;}
+.upload-icon{font-size:40px;margin-bottom:14px;}
+.upload-box.has-file .upload-icon{font-size:24px;margin-bottom:6px;}
+.upload-box h2{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.upload-box.has-file h2{font-size:15px;margin-bottom:3px;}
+.upload-box p{font-size:13px;color:var(--text-muted);}
+.upload-hint{margin-top:16px;display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.upload-hint span{font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:4px;}
+
+/* PAGE BODY */
+.page-body{max-width:1280px;margin:0 auto;padding:20px 32px 48px;}
+
+/* SECTION TITLES */
+.section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;margin-top:28px;display:flex;align-items:center;gap:10px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* EXEC STRIP */
+.exec-summary{background:var(--teal);border-radius:12px;padding:20px 28px;display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;margin-bottom:4px;}
+.exec-divider{width:1px;background:rgba(255,255,255,.2);margin:4px 24px;}
+.em-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:5px;}
+.em-val{font-size:28px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.5px;}
+.em-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:4px;font-weight:500;}
+.em-badge{display:inline-flex;align-items:center;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:6px;}
+.em-badge.gold{background:var(--gold);color:var(--navy);}
+
+/* BD BAR */
+.bd-bar-wrap{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:20px 24px;margin-top:14px;}
+.bd-bar-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;}
+.bd-bar-header .bd-title{font-size:12px;font-weight:700;color:var(--navy);}
+.bd-bar-header .bd-meta{font-size:11px;color:var(--text-muted);font-weight:500;}
+.month-timeline{position:relative;height:36px;background:var(--off-white);border-radius:6px;overflow:hidden;margin-bottom:10px;}
+.mt-elapsed{position:absolute;top:0;left:0;bottom:0;background:var(--teal);display:flex;align-items:center;padding-left:12px;}
+.mt-elapsed span{font-size:11px;font-weight:700;color:rgba(255,255,255,.9);white-space:nowrap;}
+.mt-remaining{position:absolute;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:flex-end;padding-right:12px;}
+.mt-remaining span{font-size:11px;font-weight:600;color:var(--text-muted);white-space:nowrap;}
+.bd-stats{display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;}
+.bd-stat{font-size:12px;color:var(--text-muted);}
+.bd-stat b{color:var(--navy);font-weight:700;}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.kpi-card{background:var(--white);border-radius:10px;padding:20px 22px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal);border-radius:10px 10px 0 0;}
+.kpi-card.ag::before{background:var(--gold);}
+.kpi-card.ag2::before{background:var(--green);}
+.kpi-card.aw::before{background:var(--warm);}
+.kc-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+.kc-val{font-size:26px;font-weight:800;color:var(--navy);letter-spacing:-.5px;line-height:1;}
+.kc-sub{font-size:11px;color:var(--text-muted);margin-top:6px;font-weight:500;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.delta{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.dp{background:var(--green-light);color:var(--green);}
+.dn{background:var(--red-light);color:var(--red);}
+.dn2{background:var(--teal-light);color:var(--teal-dark);}
+
+/* FORECAST */
+.forecast-grid{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:14px;}
+.fc-card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:24px 24px 20px;position:relative;}
+.fc-card.best{border-color:var(--teal);border-width:2px;background:linear-gradient(160deg,#f0fafb 0%,#fff 50%);}
+.fc-best-badge{position:absolute;top:0;left:50%;transform:translateX(-50%);background:var(--teal);color:#fff;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 14px;border-radius:0 0 8px 8px;}
+.fc-name{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;margin-top:8px;}
+.fc-vol{font-size:34px;font-weight:800;color:var(--navy);letter-spacing:-1px;line-height:1;}
+.fc-card.best .fc-vol{color:var(--teal-dark);}
+.fc-units{font-size:16px;font-weight:600;color:var(--text-muted);margin-top:4px;}
+.fc-div{height:1px;background:var(--border);margin:16px 0;}
+.fc-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:8px;}
+.fc-row .fcrl{color:var(--text-muted);font-weight:500;}
+.fc-row .fcrv{font-weight:700;color:var(--navy);}
+.fc-method{font-size:11px;color:var(--text-light);font-style:italic;margin-top:10px;line-height:1.5;font-family:'Lora',serif;}
+
+/* SIGNALS */
+.signals-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.signal-card{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:18px 20px;}
+.sc-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;}
+.sc-val{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.3px;}
+.sc-sub{font-size:11px;color:var(--text-muted);margin-top:5px;font-weight:500;}
+.q-bar{margin-top:10px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.q-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+
+/* HIST TABLE */
+.hist-table-wrap{background:var(--white);border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+.hist-table-title{padding:14px 20px;background:var(--off-white);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--navy);display:flex;justify-content:space-between;align-items:center;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--navy);color:rgba(255,255,255,.75);padding:10px 14px;text-align:right;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
+thead th:first-child{text-align:left;}
+tbody td{padding:10px 14px;text-align:right;border-bottom:1px solid var(--border);color:var(--text);font-weight:500;}
+tbody td:first-child{text-align:left;font-weight:600;color:var(--navy);}
+tbody tr:nth-child(even) td{background:var(--off-white);}
+tbody tr.ytd-row td{background:var(--teal-light)!important;font-weight:700;color:var(--teal-dark);}
+tbody tr.mtd-row td{background:var(--gold-light)!important;font-weight:700;}
+tbody tr.mtd-row td:first-child{color:#9a6200;}
+.tu{color:var(--green);font-weight:700;}
+.td{color:var(--red);font-weight:700;}
+.tf{color:var(--text-muted);}
+
+/* INSIGHTS */
+.insights-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.insight-card{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:20px 22px;}
+.ic-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;}
+.ic-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.ic-body{font-size:12px;color:var(--text-muted);line-height:1.6;font-family:'Lora',serif;}
+.ic-body b{color:var(--navy);font-family:'Montserrat',sans-serif;font-weight:700;}
+
+/* FOOTER */
+.page-footer{background:var(--navy);padding:16px 32px;text-align:center;font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.5px;font-weight:500;margin-top:32px;}
+.page-footer span{color:rgba(255,255,255,.55);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.anim{animation:fadeUp .4s ease both;}
+.a1{animation-delay:.04s;}.a2{animation-delay:.09s;}.a3{animation-delay:.14s;}.a4{animation-delay:.19s;}
+.hidden{display:none!important;}
+
+/* TAB NAV */
+.tab-nav{max-width:1280px;margin:0 auto;padding:0 32px;display:flex;gap:0;border-bottom:2px solid var(--border);background:var(--white);}
+.tab-btn{padding:14px 24px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted);background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:8px;}
+.tab-btn:hover{color:var(--navy);}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal);}
+.tab-count{background:var(--teal-light);color:var(--teal-dark);font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center;}
+.save-bar{max-width:1280px;margin:0 auto;padding:12px 32px 0;display:flex;justify-content:flex-end;gap:10px;align-items:center;}
+.btn-save{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s;}
+.btn-save:hover{background:var(--teal-dark);}
+.btn-save.saved{background:var(--green);}
+.btn-clear{background:none;color:var(--text-muted);border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-clear:hover{border-color:var(--red);color:var(--red);}
+.hist-page{max-width:1280px;margin:0 auto;padding:24px 32px 48px;}
+.hist-empty{text-align:center;padding:64px 32px;color:var(--text-muted);}
+.hist-empty .he-icon{font-size:40px;margin-bottom:14px;}
+.hist-empty h3{font-family:'Lora',serif;font-size:18px;color:var(--navy);margin-bottom:8px;}
+.hist-empty p{font-size:13px;line-height:1.6;}
+/* REFRESH BAR */
+.refresh-bar{display:flex;align-items:center;justify-content:space-between;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 20px;gap:16px;}
+.refresh-left{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text-muted);font-weight:500;}
+.refresh-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.refresh-date{color:var(--navy);font-weight:700;}
+.refresh-btn{background:var(--teal);color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .15s;}
+.refresh-btn:hover{background:var(--teal-dark);}
+
+/* TREND CHART — multi-metric tabs */
+.trend-section{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:20px 24px 16px;margin-bottom:20px;}
+.trend-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.trend-controls-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;}
+.trend-tabs-row{display:flex;gap:4px;flex-wrap:wrap;}
+.trend-chart-area{height:160px;position:relative;overflow:hidden;}
+.trend-section h3{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;}
+.trend-tab{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.trend-tab:hover{border-color:var(--teal);color:var(--teal);}
+.trend-tab.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.trend-bars{display:flex;align-items:flex-end;gap:4px;height:100%;padding-bottom:0;}
+.trend-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;height:100%;justify-content:flex-end;}
+.trend-group{display:flex;align-items:flex-end;gap:2px;width:100%;}
+.trend-bar{flex:1;border-radius:3px 3px 0 0;min-height:3px;transition:opacity .2s;}
+.trend-bar-forecast{background:var(--teal);opacity:0.75;}
+.trend-bar-actual{background:var(--green);opacity:0.9;}
+.trend-bar-single{width:100%;border-radius:3px 3px 0 0;min-height:3px;}
+.trend-val{font-size:8px;font-weight:700;color:var(--navy);white-space:nowrap;text-align:center;line-height:1.2;}
+.trend-val-pair{font-size:7px;color:var(--text-muted);white-space:nowrap;text-align:center;line-height:1.3;}
+.trend-label{font-size:9px;color:var(--text-muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52px;}
+.snap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:4px;}
+.snap-card{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+.snap-card-hdr{background:var(--navy);padding:14px 16px 12px;position:relative;}
+.snap-card-hdr::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--teal-dark),var(--navy));opacity:.85;}
+.snap-card-hdr .sch{position:relative;z-index:1;}
+.snap-card-hdr .sch-date{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
+.snap-card-hdr .sch-bd{font-size:10px;color:rgba(255,255,255,.55);font-weight:500;}
+.snap-del{position:absolute;top:10px;right:10px;z-index:2;background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.5);width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:13px;line-height:22px;text-align:center;transition:all .15s;}
+.snap-del:hover{background:rgba(192,57,43,.7);color:#fff;}
+.snap-body{padding:14px 16px 16px;}
+.snap-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.snap-row:last-child{border-bottom:none;padding-bottom:0;}
+.snap-row .sr-lbl{color:var(--text-muted);font-weight:500;}
+.snap-row .sr-val{font-weight:700;color:var(--navy);}
+.snap-row .sr-val.teal{color:var(--teal-dark);}
+.snap-row .sr-val.green{color:var(--green);}
+.snap-note{font-size:10px;color:var(--text-light);margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-style:italic;}
+
+/* COMPACT CARD (grid view) */
+.snap-card{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s;}
+.snap-card:hover{box-shadow:0 4px 20px rgba(0,129,141,.13);transform:translateY(-2px);}
+.snap-card-hdr{background:var(--navy);padding:12px 14px 10px;position:relative;}
+.snap-card-hdr::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--teal-dark),var(--navy));opacity:.85;}
+.snap-card-hdr .sch{position:relative;z-index:1;}
+.snap-card-hdr .sch-date{font-size:12px;font-weight:700;color:#fff;margin-bottom:2px;}
+.snap-card-hdr .sch-bd{font-size:10px;color:rgba(255,255,255,.55);font-weight:500;}
+.snap-del{position:absolute;top:8px;right:8px;z-index:2;background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.5);width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:13px;line-height:20px;text-align:center;transition:all .15s;}
+.snap-del:hover{background:rgba(192,57,43,.7);color:#fff;}
+.snap-body{padding:10px 12px 12px;}
+.snap-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.snap-row:last-child{border-bottom:none;padding-bottom:0;}
+.snap-row .sr-lbl{color:var(--text-muted);font-weight:500;}
+.snap-row .sr-val{font-weight:700;color:var(--navy);}
+.snap-row .sr-val.teal{color:var(--teal-dark);}
+.snap-row .sr-val.green{color:var(--green);}
+.snap-click-hint{font-size:10px;color:var(--text-light);text-align:center;margin-top:8px;padding-top:6px;border-top:1px solid var(--border);}
+.partial-card .snap-card-hdr::before{background:linear-gradient(135deg,#7a4800,#3a2200)!important;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,35,.55);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none!important;}
+.modal-box{background:var(--white);border-radius:16px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.modal-hdr{background:var(--navy);padding:20px 24px 18px;position:relative;border-radius:16px 16px 0 0;}
+.modal-hdr::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--teal-dark),var(--navy));opacity:.85;border-radius:16px 16px 0 0;}
+.modal-hdr .mh{position:relative;z-index:1;}
+.modal-hdr .mh-date{font-family:'Lora',serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;}
+.modal-hdr .mh-sub{font-size:11px;color:rgba(255,255,255,.55);}
+.modal-close{position:absolute;top:14px;right:16px;z-index:2;background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.6);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:18px;line-height:28px;text-align:center;transition:all .15s;}
+.modal-close:hover{background:rgba(255,255,255,.25);color:#fff;}
+.modal-body{padding:24px;}
+.modal-section{margin-bottom:20px;}
+.modal-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.modal-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;}
+.modal-kpi{background:var(--off-white);border-radius:8px;padding:10px 12px;border:1px solid var(--border);}
+.modal-kpi .mk-label{font-size:10px;color:var(--text-muted);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+.modal-kpi .mk-val{font-size:18px;font-weight:800;color:var(--navy);letter-spacing:-.3px;}
+.modal-kpi .mk-val.teal{color:var(--teal-dark);}
+.modal-kpi .mk-val.green{color:var(--green);}
+.modal-kpi .mk-val.gold{color:#9a6200;}
+.modal-kpi .mk-sub{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.modal-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.modal-detail-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--off-white);border-radius:6px;font-size:12px;}
+.modal-detail-row .mdr-lbl{color:var(--text-muted);font-weight:500;}
+.modal-detail-row .mdr-val{font-weight:700;color:var(--navy);}
+.modal-scenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.modal-sc{background:var(--off-white);border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);}
+.modal-sc.best{border-color:var(--teal);background:var(--teal-light);}
+.modal-sc .ms-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:5px;}
+.modal-sc.best .ms-name{color:var(--teal-dark);}
+.modal-sc .ms-vol{font-size:18px;font-weight:800;color:var(--navy);}
+.modal-sc.best .ms-vol{color:var(--teal-dark);}
+.modal-sc .ms-units{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.modal-vs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.modal-vs-item{background:var(--off-white);border-radius:6px;padding:8px 10px;text-align:center;}
+.modal-vs-item .mvi-lbl{font-size:10px;color:var(--text-muted);margin-bottom:3px;}
+.modal-vs-item .mvi-val{font-size:14px;font-weight:700;}
+.modal-del-btn{width:100%;background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:10px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:4px;}
+.modal-del-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-light);}
+</style>
+</head>
+<body>
+
+
+<!-- TAB NAV -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" onclick="switchTab('dashboard')" id="tabDash">Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('history')" id="tabHist">Snapshot History &nbsp;<span class="tab-count" id="histCount">0</span></button>
+</div>
+
+<header class="page-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 1200 1200">
+        <path fill="#00818D" d="M596.662 144.389c34.998-3.172 61.633 12.496 92.264 26.447l92.646 42.659 148.298 67.771c24.231 11.112 55.887 23.912 77.53 38.258 13.33 8.839 24.72 33.444 25.74 49.353 1.78 27.628.95 59.551.93 87.73l-.04 172.002-.01 232.228.09 70.326c.13 33.766 7.63 85.057-38.179 90.057-15.486 1.69-29.669 1.15-45.212 1.13l-74.309-.02-285.711-.03-86.45.01c-14.861.01-38.143-.55-52.35 1.07l-.046-165.707c19.573 1.577 50.149.697 70.701.7l127.415-.019 121.152.044c21.565.013 43.424.502 64.903-.442 18.695-.822 32.803-15.317 34.427-33.722 1.872-21.221 1.396-42.176 1.37-63.418l-.058-96.799.038-113.437c.027-24.681.763-55.347-1.605-79.567-12.076-45.993-37.565-49.775-76.888-67.799l-72.36-33.097-54.019-24.848c-9.531-4.383-22.948-10.989-32.496-14.364a96.2 96.2 0 0 0-33.498-5.572c-25.078.388-42.907 10.519-65.353 20.392l-64.644 28.356-71.674 31.049c-12.541 5.403-30.558 12.592-42.119 18.702a78.6 78.6 0 0 0-19.741 14.962c-9.545 10.062-13.98 19.273-14.725 32.864-1.192 21.728-.655 45.343-.657 67.163l-.011 131.777.001 230.009c.004 39.353-.966 83.426.274 122.493-42.124-2.7-86.002 1.52-128.054-1.62-21.241-1.59-34.093-22.682-35.179-42.768-1.814-33.543-.949-67.966-.947-101.836l-.018-196.325-.042-204.259.009-63.039c.024-39.48-2.981-79.379 39.039-100.877 17.503-8.954 35.936-16.19 53.963-24.053l106.559-46.34 136.739-59.616c29.428-12.846 71.164-34.849 102.307-37.978"/>
+        <path fill="#8D807A" d="M595.645 451.22c1.691-.129 3.383-.179 5.078-.229 6.631-.197 13.421-.426 19.841 1.531 14.632 4.461 114.164 49.015 123.352 57.864 10.183 9.808 11.358 21.62 11.657 35.051.863 38.733-.121 77.697-.053 116.46.032 18.651 2.007 48.461-.496 65.954-.65 4.537-2.584 8.555-5.811 11.837-3.556 3.615-7.359 5.308-12.282 6.235-14.533 2.736-30.894 1.266-45.713 1.252l-78.718-.093-88.692.097c-16.25.029-32.393.216-48.658-.311-20.876-.677-25.795-12.942-25.444-31.885.12-6.488-.041-13.959-.045-20.49l.023-61.993-.042-64.309c.007-25.725-5.239-51.071 22.278-64.213 31.426-15.009 63.719-28.079 95.559-42.207 8.45-3.75 19.332-8.5 28.166-10.551"/>
+      </svg>
+      <div class="header-title">
+        <div class="eyebrow">Partners Mortgage</div>
+        <h1>Executive Projections</h1>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="hdr-snap-label">Pipeline Snapshot</div>
+      <div class="hdr-snap-date" id="hdrDate">Upload file to begin</div>
+      <div class="hdr-bd-status" id="hdrBD">&nbsp;</div>
+    </div>
+  </div>
+</header>
+
+<!-- UPLOAD -->
+<div class="upload-zone" id="uploadZone">
+  <!-- INITIAL STATE: full drop zone (hidden once auto-loaded) -->
+  <div class="upload-box" id="dropBox" onclick="document.getElementById('fileIn').click()">
+    <div class="upload-icon" id="uploadIcon">📊</div>
+    <h2 id="uploadTitle">Drop your tracking spreadsheet here</h2>
+    <p id="uploadSub">Partners_Production_Tracking.xlsx &nbsp;·&nbsp; or click to browse</p>
+    <div class="upload-hint" id="uploadHints">
+      <span>✓ Reads Production Overview sheet automatically</span>
+      <span>✓ Detects most recent snapshot date</span>
+      <span>✓ BD-adjusted forecast model applied</span>
+    </div>
+    <input type="file" id="fileIn" accept=".xlsx,.xls">
+  </div>
+  <!-- SLIM REFRESH BAR: shown after auto-load -->
+  <div class="refresh-bar hidden" id="refreshBar">
+    <div class="refresh-left">
+      <span class="refresh-dot" id="refreshDot"></span>
+      <span id="refreshLabel">Showing last saved snapshot</span>
+      <span class="refresh-date" id="refreshDate"></span>
+    </div>
+    <button class="refresh-btn" onclick="document.getElementById('fileIn2').click()">
+      ↻ &nbsp;Update with new file
+    </button>
+    <input type="file" id="fileIn2" accept=".xlsx,.xls" style="display:none">
+  </div>
+</div>
+
+
+<!-- SAVE BAR (shown after file load) -->
+<div class="save-bar hidden" id="saveBar">
+  <button class="btn-save" id="btnSave" onclick="saveSnapshot()">⬇ Save This Snapshot to History</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page-body hidden" id="dash">
+
+  <!-- EXEC STRIP -->
+  <div class="exec-summary anim a1" style="margin-top:20px;">
+    <div class="exec-metric">
+      <div class="em-label">Best Estimate — <span id="esMonth"></span></div>
+      <div class="em-val" id="esBase"></div>
+      <div class="em-sub" id="esBaseU"></div>
+      <div class="em-badge gold">Base Case</div>
+    </div>
+    <div class="exec-divider"></div>
+    <div class="exec-metric">
+      <div class="em-label">Funded MTD</div>
+      <div class="em-val" id="esFunded"></div>
+      <div class="em-sub" id="esFundedU"></div>
+      <div class="em-badge" id="esPct"></div>
+    </div>
+    <div class="exec-divider"></div>
+    <div class="exec-metric">
+      <div class="em-label">YTD <span id="esYtdLbl"></span></div>
+      <div class="em-val" id="esYtd"></div>
+      <div class="em-sub" id="esYtdU"></div>
+      <div class="em-badge" id="esYtdBadge"></div>
+    </div>
+    <div class="exec-divider"></div>
+    <div class="exec-metric">
+      <div class="em-label">Locked Pipeline</div>
+      <div class="em-val" id="esLocked"></div>
+      <div class="em-sub">Active locks all dates</div>
+      <div class="em-badge" id="esLockBadge"></div>
+    </div>
+  </div>
+
+  <!-- BD BAR -->
+  <div class="bd-bar-wrap anim a2">
+    <div class="bd-bar-header">
+      <span class="bd-title" id="bdTitle"></span>
+      <span class="bd-meta" id="bdMeta"></span>
+    </div>
+    <div class="month-timeline">
+      <div class="mt-elapsed" id="bdElBar" style="width:0%"><span id="bdElLbl"></span></div>
+      <div class="mt-remaining"><span id="bdRemLbl"></span></div>
+    </div>
+    <div class="bd-stats" id="bdStats"></div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="section-title">Pipeline Snapshot — <span id="kpiDate"></span></div>
+  <div class="kpi-grid">
+    <div class="kpi-card anim a1">
+      <div class="kc-label">COE in Month (Remaining)</div>
+      <div class="kc-val" id="kCoe"></div>
+      <div class="kc-sub">Loans with this-month close date &nbsp;<span class="delta dn2" id="kCoeN"></span></div>
+    </div>
+    <div class="kpi-card ag anim a2">
+      <div class="kc-label">Funded + COE (Ceiling)</div>
+      <div class="kc-val" id="kFCoe"></div>
+      <div class="kc-sub">If all COE loans close &nbsp;<span class="delta" id="kFCoeN"></span></div>
+    </div>
+    <div class="kpi-card ag2 anim a3">
+      <div class="kc-label">COE w/ Locks</div>
+      <div class="kc-val" id="kCoeL"></div>
+      <div class="kc-sub"><span class="delta" id="kCoeLN"></span>&nbsp;<span id="kCoeLSub"></span></div>
+    </div>
+    <div class="kpi-card aw anim a4">
+      <div class="kc-label">COE Next Month (Carry)</div>
+      <div class="kc-val" id="kCoeNext"></div>
+      <div class="kc-sub">Forward pipeline &nbsp;<span class="delta" id="kCoeNextN"></span></div>
+    </div>
+  </div>
+
+  <!-- FORECAST SCENARIOS -->
+  <div class="section-title">Forecast Scenarios — BD-Adjusted Model</div>
+  <div class="forecast-grid">
+    <div class="fc-card anim a1">
+      <div class="fc-name">Conservative Floor</div>
+      <div class="fc-vol" id="fcCV"></div>
+      <div class="fc-units" id="fcCU"></div>
+      <div class="fc-div"></div>
+      <div class="fc-row"><span class="fcrl">vs prior month</span><span class="fcrv" id="fcCPrior"></span></div>
+      <div class="fc-row"><span class="fcrl">vs same month LY</span><span class="fcrv" id="fcCLY"></span></div>
+      <div class="fc-row"><span class="fcrl">vs 6-month avg</span><span class="fcrv" id="fcC6"></span></div>
+      <div class="fc-method" id="fcCMeth"></div>
+    </div>
+    <div class="fc-card best anim a2">
+      <div class="fc-best-badge">Best Estimate</div>
+      <div class="fc-name">Base Case</div>
+      <div class="fc-vol" id="fcBV"></div>
+      <div class="fc-units" id="fcBU"></div>
+      <div class="fc-div"></div>
+      <div class="fc-row"><span class="fcrl">vs prior month</span><span class="fcrv" id="fcBPrior"></span></div>
+      <div class="fc-row"><span class="fcrl">vs same month LY</span><span class="fcrv" id="fcBLY"></span></div>
+      <div class="fc-row"><span class="fcrl">vs 6-month avg</span><span class="fcrv" id="fcB6"></span></div>
+      <div class="fc-method">BD-fitted conversion rates &nbsp;·&nbsp; 10-month backtest accuracy: ±7.7% mean error</div>
+    </div>
+    <div class="fc-card anim a3">
+      <div class="fc-name">Optimistic Ceiling</div>
+      <div class="fc-vol" id="fcOV"></div>
+      <div class="fc-units" id="fcOU"></div>
+      <div class="fc-div"></div>
+      <div class="fc-row"><span class="fcrl">vs prior month</span><span class="fcrv" id="fcOPrior"></span></div>
+      <div class="fc-row"><span class="fcrl">vs same month LY</span><span class="fcrv" id="fcOLY"></span></div>
+      <div class="fc-row"><span class="fcrl">vs 6-month avg</span><span class="fcrv" id="fcO6"></span></div>
+      <div class="fc-method">Base Case + non-COE pipeline pull-ins at 15%.</div>
+    </div>
+  </div>
+
+  <!-- SIGNALS -->
+  <div class="section-title">Pipeline Quality Signals</div>
+  <div class="signals-grid">
+    <div class="signal-card">
+      <div class="sc-label">COE Lock Coverage</div>
+      <div class="sc-val" id="sg1V"></div>
+      <div class="sc-sub" id="sg1S"></div>
+      <div class="q-bar"><div class="q-fill" id="sg1B" style="width:0%;background:var(--green)"></div></div>
+    </div>
+    <div class="signal-card">
+      <div class="sc-label">Locked Pipeline Depth</div>
+      <div class="sc-val" id="sg2V"></div>
+      <div class="sc-sub" id="sg2S"></div>
+      <div class="q-bar"><div class="q-fill" id="sg2B" style="width:0%;background:var(--teal)"></div></div>
+    </div>
+    <div class="signal-card">
+      <div class="sc-label">Funded + COE vs 6-mo Avg</div>
+      <div class="sc-val" id="sg3V"></div>
+      <div class="sc-sub" id="sg3S"></div>
+      <div class="q-bar"><div class="q-fill" id="sg3B" style="width:0%;background:var(--gold)"></div></div>
+    </div>
+    <div class="signal-card">
+      <div class="sc-label">Next Month Carry</div>
+      <div class="sc-val" id="sg4V"></div>
+      <div class="sc-sub" id="sg4S"></div>
+      <div class="q-bar"><div class="q-fill" id="sg4B" style="width:0%;background:var(--warm)"></div></div>
+    </div>
+  </div>
+
+  <!-- HISTORY TABLE -->
+  <div class="section-title">Monthly Production History</div>
+  <div class="hist-table-wrap">
+    <div class="hist-table-title">
+      <span>Rolling 24-Month Summary</span>
+      <span style="font-size:11px;color:var(--text-muted);font-weight:500;">Funded loans only &nbsp;·&nbsp; MTD row = snapshot date</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr>
+          <th style="text-align:left;">Month</th><th>Units</th><th>Volume Funded</th>
+          <th>Avg Loan Size</th><th>MoM Vol %</th><th>YoY Units %</th>
+          <th>COE w/ Locks</th><th>COE Next Mo</th>
+        </tr></thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="section-title">Executive Observations</div>
+  <div class="insights-row">
+    <div class="insight-card">
+      <div class="ic-icon" style="background:var(--teal-light)">📈</div>
+      <div class="ic-title" id="i1T"></div>
+      <div class="ic-body" id="i1B"></div>
+    </div>
+    <div class="insight-card">
+      <div class="ic-icon" style="background:var(--gold-light)">⚠️</div>
+      <div class="ic-title" id="i2T"></div>
+      <div class="ic-body" id="i2B"></div>
+    </div>
+    <div class="insight-card">
+      <div class="ic-icon" style="background:var(--green-light)">🏆</div>
+      <div class="ic-title" id="i3T"></div>
+      <div class="ic-body" id="i3B"></div>
+    </div>
+    <div class="insight-card">
+      <div class="ic-icon" style="background:var(--warm-light)">🗓️</div>
+      <div class="ic-title">Business Day Model</div>
+      <div class="ic-body" id="i4B"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="hist-page hidden" id="histPage">
+
+  <!-- TREND CHART -->
+  <div class="trend-section" id="trendSection">
+    <div class="trend-controls">
+      <span class="trend-controls-label">Trend Across All Snapshots</span>
+      <div class="trend-tabs-row" id="trendTabs">
+        <button class="trend-tab active" onclick="setTrendMetric('paired',this)">Forecast vs Actual</button>
+        <button class="trend-tab" onclick="setTrendMetric('vBase',this)">Base Forecast</button>
+        <button class="trend-tab" onclick="setTrendMetric('actualVol',this)">Actual Final</button>
+        <button class="trend-tab" onclick="setTrendMetric('volMTD',this)">Funded MTD</button>
+        <button class="trend-tab" onclick="setTrendMetric('locked',this)">Locked Pipeline</button>
+        <button class="trend-tab" onclick="setTrendMetric('lockPct',this)">Lock Coverage %</button>
+        <button class="trend-tab" onclick="setTrendMetric('coeNext',this)">COE Next Mo</button>
+      </div>
+    </div>
+    <div class="trend-chart-area">
+      <div class="trend-bars" id="trendBars"></div>
+    </div>
+    <div id="trendSubtitle" style="font-size:11px;color:var(--text-muted);margin-top:10px;font-style:italic;font-family:'Lora',serif;text-align:center;"></div>
+  </div>
+
+  <!-- SECTION A: MID-MONTH HISTORICAL RECORD -->
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px;">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);">Mid-Month Historical Record</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:3px;font-family:'Lora',serif;font-style:italic;">Pre-seeded from spreadsheet data · BD ~10-11 snapshot each month · actual finals shown for calibration</div>
+    </div>
+    <div style="font-size:11px;color:var(--text-light);">
+      <span style="background:var(--teal-light);color:var(--teal-dark);padding:2px 8px;border-radius:10px;font-weight:700;font-size:10px;">Full pipeline</span>
+      &nbsp;
+      <span style="background:#fff3e0;color:#9a4f00;padding:2px 8px;border-radius:10px;font-weight:700;font-size:10px;">⚠ Partial data</span>
+    </div>
+  </div>
+  <div class="snap-grid" id="histGrid"></div>
+
+  <!-- SECTION B: LIVE SAVED SNAPSHOTS -->
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin:28px 0 12px;">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);">Live Saved Snapshots</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:3px;font-family:'Lora',serif;font-style:italic;">Snapshots you save from fresh file uploads · accumulates through the month</div>
+    </div>
+  </div>
+  <div class="hist-empty hidden" id="liveEmpty">
+    <div class="he-icon" style="font-size:28px;margin-bottom:8px;">📁</div>
+    <h3 style="font-size:14px;">No live snapshots saved yet</h3>
+    <p style="font-size:12px;">Load a spreadsheet on the Dashboard tab and click <strong>"Save to History"</strong><br>to start accumulating within-month snapshots here.</p>
+  </div>
+  <div class="snap-grid hidden" id="liveGrid"></div>
+
+</div>
+
+<!-- SNAPSHOT DETAIL MODAL -->
+<div class="modal-overlay hidden" id="snapModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div class="mh">
+        <div class="mh-date" id="mDate"></div>
+        <div class="mh-sub" id="mSub"></div>
+      </div>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <div class="modal-section-title">Forecast Scenarios</div>
+        <div class="modal-scenarios">
+          <div class="modal-sc">
+            <div class="ms-name">Conservative</div>
+            <div class="ms-vol" id="mCon"></div>
+            <div class="ms-units" id="mConU"></div>
+          </div>
+          <div class="modal-sc best">
+            <div class="ms-name">Base Case</div>
+            <div class="ms-vol" id="mBase"></div>
+            <div class="ms-units" id="mBaseU"></div>
+          </div>
+          <div class="modal-sc">
+            <div class="ms-name">Optimistic</div>
+            <div class="ms-vol" id="mOpt"></div>
+            <div class="ms-units" id="mOptU"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Business Day Position</div>
+        <div class="modal-kpi-grid">
+          <div class="modal-kpi">
+            <div class="mk-label">BD Elapsed</div>
+            <div class="mk-val" id="mElBD"></div>
+            <div class="mk-sub" id="mElBDSub"></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="mk-label">BD Remaining</div>
+            <div class="mk-val teal" id="mRemBD"></div>
+            <div class="mk-sub" id="mRemBDSub"></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="mk-label">Conv Rate (BD-fitted)</div>
+            <div class="mk-val" id="mConv"></div>
+            <div class="mk-sub" id="mConvSub"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Pipeline Snapshot</div>
+        <div class="modal-kpi-grid">
+          <div class="modal-kpi">
+            <div class="mk-label">Funded MTD</div>
+            <div class="mk-val" id="mFunded"></div>
+            <div class="mk-sub" id="mFundedU"></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="mk-label">Locked Pipeline</div>
+            <div class="mk-val teal" id="mLocked"></div>
+            <div class="mk-sub">Active across all dates</div>
+          </div>
+          <div class="modal-kpi">
+            <div class="mk-label">COE Lock Coverage</div>
+            <div class="mk-val" id="mLockPct"></div>
+            <div class="mk-sub" id="mLockPctSub"></div>
+          </div>
+        </div>
+        <div class="modal-detail-grid" style="margin-top:8px;">
+          <div class="modal-detail-row"><span class="mdr-lbl">COE in Month (remaining)</span><span class="mdr-val" id="mCoeIn"></span></div>
+          <div class="modal-detail-row"><span class="mdr-lbl">COE w/ Locks</span><span class="mdr-val" id="mCoeLocks"></span></div>
+          <div class="modal-detail-row"><span class="mdr-lbl">Funded + COE (ceiling)</span><span class="mdr-val" id="mFCoe"></span></div>
+          <div class="modal-detail-row"><span class="mdr-lbl">COE Next Month (carry)</span><span class="mdr-val" id="mCoeNext"></span></div>
+        </div>
+      </div>
+
+      <div class="modal-section" id="mActualSection">
+        <div class="modal-section-title">Actual Result vs. Forecast</div>
+        <div class="modal-kpi-grid" id="mActualGrid">
+          <div class="modal-kpi">
+            <div class="mk-label">Actual Volume</div>
+            <div class="mk-val" id="mActualVol"></div>
+            <div class="mk-sub" id="mActualUnits"></div>
+          </div>
+          <div class="modal-kpi">
+            <div class="mk-label">Base Forecast Was</div>
+            <div class="mk-val teal" id="mForecastWas"></div>
+            <div class="mk-sub">at time of snapshot</div>
+          </div>
+          <div class="modal-kpi">
+            <div class="mk-label">Forecast Accuracy</div>
+            <div class="mk-val" id="mAccuracy"></div>
+            <div class="mk-sub" id="mAccuracySub"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">vs. Benchmarks</div>
+        <div class="modal-vs-grid" id="mVsGrid"></div>
+      </div>
+
+      <button class="modal-del-btn" id="mDelBtn">Remove this snapshot</button>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <span>Partners Mortgage Executive Projections</span> &nbsp;·&nbsp; <span id="ftDate">Upload a file to begin</span> &nbsp;·&nbsp; BD-Adjusted Pipeline Model v2 &nbsp;·&nbsp; <span>You matter.</span>
+</footer>
+
+<script>
+const HIST=[
+  {m:'May 2024',mo:5,yr:2024,u:24,v:8737227,cL:null,cN:null},
+  {m:'Jun 2024',mo:6,yr:2024,u:28,v:15132106,cL:null,cN:null},
+  {m:'Jul 2024',mo:7,yr:2024,u:29,v:12644716,cL:null,cN:null},
+  {m:'Aug 2024',mo:8,yr:2024,u:33,v:12602992,cL:null,cN:21264880},
+  {m:'Sep 2024',mo:9,yr:2024,u:31,v:15633933,cL:null,cN:10171221},
+  {m:'Oct 2024',mo:10,yr:2024,u:42,v:19490027,cL:null,cN:22883140},
+  {m:'Nov 2024',mo:11,yr:2024,u:53,v:24685408,cL:null,cN:8172254},
+  {m:'Dec 2024',mo:12,yr:2024,u:60,v:27649189,cL:7121800,cN:23894013},
+  {m:'Jan 2025',mo:1,yr:2025,u:32,v:14851781,cL:null,cN:null},
+  {m:'Feb 2025',mo:2,yr:2025,u:34,v:12796368,cL:null,cN:null},
+  {m:'Mar 2025',mo:3,yr:2025,u:42,v:19490027,cL:null,cN:22883140},
+  {m:'Apr 2025',mo:4,yr:2025,u:53,v:24685408,cL:null,cN:8172254},
+  {m:'May 2025',mo:5,yr:2025,u:60,v:27649189,cL:7121800,cN:23894013},
+  {m:'Jun 2025',mo:6,yr:2025,u:57,v:25392978,cL:4459877,cN:24554948},
+  {m:'Jul 2025',mo:7,yr:2025,u:51,v:23177031,cL:5125180,cN:16244341},
+  {m:'Aug 2025',mo:8,yr:2025,u:43,v:17902434,cL:2915500,cN:27445436},
+  {m:'Sep 2025',mo:9,yr:2025,u:59,v:30626310,cL:2261142,cN:34932696},
+  {m:'Oct 2025',mo:10,yr:2025,u:71,v:32536279,cL:null,cN:44043842},
+  {m:'Nov 2025',mo:11,yr:2025,u:56,v:25849466,cL:3177857,cN:33824713},
+  {m:'Dec 2025',mo:12,yr:2025,u:68,v:27774596,cL:7282905,cN:29781397},
+  {m:'Jan 2026',mo:1,yr:2026,u:45,v:22801408,cL:6841555,cN:36273735},
+  {m:'Feb 2026',mo:2,yr:2026,u:68,v:32949251,cL:5780577,cN:35375015},
+  {m:'Mar 2026',mo:3,yr:2026,u:76,v:37244738,cL:5291865,cN:37186681},
+];
+
+const HOL=new Set(['2024-09-02','2024-10-14','2024-11-11','2024-11-28','2024-12-25',
+  '2025-01-01','2025-01-20','2025-02-17','2025-05-26','2025-06-19','2025-07-04',
+  '2025-09-01','2025-10-13','2025-11-11','2025-11-27','2025-12-25',
+  '2026-01-01','2026-01-19','2026-02-16','2026-05-25','2026-06-19','2026-07-03',
+  '2026-09-07','2026-11-11','2026-11-26','2026-12-25']);
+
+function isBD(d){if(d.getDay()===0||d.getDay()===6)return false;return!HOL.has(d.toISOString().slice(0,10));}
+function bdsInMonth(y,m){let c=0,d=new Date(y,m-1,1);while(d.getMonth()===m-1){if(isBD(d))c++;d.setDate(d.getDate()+1);}return c;}
+function bdsElapsed(s){let c=0,d=new Date(s.getFullYear(),s.getMonth(),1);while(d<=s){if(isBD(d))c++;d.setDate(d.getDate()+1);}return c;}
+function bdsRemaining(s){const last=new Date(s.getFullYear(),s.getMonth()+1,0);let c=0,d=new Date(s);d.setDate(d.getDate()+1);while(d<=last){if(isBD(d))c++;d.setDate(d.getDate()+1);}return c;}
+function holsRem(s){const last=new Date(s.getFullYear(),s.getMonth()+1,0);let h=[],d=new Date(s);d.setDate(d.getDate()+1);while(d<=last){const k=d.toISOString().slice(0,10);if(HOL.has(k))h.push(k);d.setDate(d.getDate()+1);}return h;}
+
+function fM(v,dec=1){if(v==null||isNaN(v))return'—';if(Math.abs(v)>=1e6)return'$'+(v/1e6).toFixed(dec)+'M';if(Math.abs(v)>=1e3)return'$'+Math.round(v/1e3)+'K';return'$'+Math.round(v).toLocaleString();}
+function fP(v){if(v==null||isNaN(v))return'—';return(v>=0?'+':'')+(v*100).toFixed(1)+'%';}
+function pC(v){return v==null?'':v>=0.02?'color:var(--green);font-weight:700':v<=-0.02?'color:var(--red);font-weight:700':'color:var(--text-muted);font-weight:600';}
+function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function html(id,v){const e=document.getElementById(id);if(e)e.innerHTML=v;}
+
+function render(s){
+  const{snapDate,snapStr,month,monthShort,yr,mo,
+    unitsMTD,volMTD,locked,coeIn,fundedCoe,coeLocks,coeNext,
+    totalBD,elBD,remBD,effRem,nHols,pctEl,
+    vCon,vBase,vOpt,uCon,uBase,uOpt,conv,
+    priorVol,lyVol,avg6,
+    ytdU,ytdV,ytdPU,ytdPV}=s;
+
+  // Header
+  set('hdrDate',snapStr);
+  set('hdrBD',`BD ${elBD} of ${totalBD} · ${remBD} BD remaining${nHols>0?' · '+nHols+' holiday'+(nHols>1?'s':'')+' ahead':' · No holidays'}`);
+  document.getElementById('hdrBD').style.color=nHols>0?'#FFD080':'var(--gold)';
+  set('ftDate','Snapshot: '+snapStr);
+
+  // Exec strip
+  set('esMonth',monthShort+' '+yr);
+  set('esBase',fM(vBase));set('esBaseU','~'+uBase+' units funded');
+  set('esFunded',fM(volMTD));set('esFundedU',unitsMTD+' units closed');
+  set('esPct',(pctEl*100).toFixed(1)+'% of month elapsed');
+  const ytdRows=HIST.filter(r=>r.yr===yr&&r.mo<mo);
+  set('esYtdLbl',ytdRows.length?'Jan–'+ytdRows[ytdRows.length-1].m.split(' ')[0]:'');
+  set('esYtd',fM(ytdV));set('esYtdU',ytdU+' units · '+ytdRows.length+' months');
+  if(ytdPV>0)set('esYtdBadge',fP((ytdV-ytdPV)/ytdPV)+' vs prior yr');
+  set('esLocked',fM(locked));
+  if(coeIn>0&&coeLocks)set('esLockBadge',Math.round(coeLocks/coeIn*100)+'% COE coverage');
+
+  // BD bar
+  set('bdTitle',month+' '+yr+' — Business Day Progress');
+  const lateMonthFlag = effRem<=5 ? ' · Late-month regime active' : '';
+  set('bdMeta','BD-Adjusted Model · Eff BD Remaining: '+effRem+' · Conv Rate: '+(conv*100).toFixed(1)+'%'+lateMonthFlag);
+  document.getElementById('bdElBar').style.width=(pctEl*100).toFixed(1)+'%';
+  set('bdElLbl',elBD+' BD elapsed · '+fM(volMTD)+' funded');
+  set('bdRemLbl',remBD+' BD remaining · ~'+fM(vBase-volMTD)+' to project');
+  const hNote=nHols>0?`<span style="color:var(--gold);font-weight:700">${nHols} holiday${nHols>1?'s':''} remaining</span>`:`<span style="color:var(--green);font-weight:700">None</span>`;
+  html('bdStats',`<div class="bd-stat">Total BDs: <b>${totalBD}</b></div><div class="bd-stat">BD elapsed: <b>${elBD}</b> (${(pctEl*100).toFixed(1)}%)</div><div class="bd-stat">BD remaining: <b>${remBD}</b></div><div class="bd-stat">Eff BD remaining: <b>${effRem}</b></div><div class="bd-stat">Holidays: ${hNote}</div>${coeLocks&&coeIn?`<div class="bd-stat">COE lock rate: <b style="color:var(--teal)">${Math.round(coeLocks/coeIn*100)}%</b></div>`:''}`);
+
+  // KPI
+  set('kpiDate',snapStr);
+  set('kCoe',fM(coeIn));set('kCoeN','not yet funded');
+  set('kFCoe',fM(fundedCoe));
+  const fcEl=document.getElementById('kFCoeN');
+  if(avg6>0&&fundedCoe){fcEl.textContent=fP((fundedCoe-avg6)/avg6)+' vs 6-mo avg';fcEl.className='delta '+(fundedCoe>=avg6?'dp':'dn');}
+  set('kCoeL',fM(coeLocks));
+  if(coeLocks&&coeIn){const r=coeLocks/coeIn;const e=document.getElementById('kCoeLN');e.textContent=(r*100).toFixed(0)+'%';e.className='delta '+(r>=.75?'dp':r>=.55?'dn2':'dn');set('kCoeLSub','of COE locked');}
+  set('kCoeNext',fM(coeNext));
+  if(coeNext!=null){const e=document.getElementById('kCoeNextN');const MID_BENCH=7e6;const diff=coeNext-MID_BENCH;e.textContent=coeNext>=10e6?'Ahead of mid-month avg':coeNext>=4e6?'Normal mid-month pace':'Building slowly';e.className='delta '+(coeNext>=10e6?'dp':coeNext>=4e6?'dn2':'dn');}
+
+  // Scenarios
+  function sc(prefix,v,u,pV,lV,a6){
+    set(prefix+'V',fM(v));set(prefix+'U','~'+u+' units');
+    const p=document.getElementById(prefix+'Prior');if(p&&pV){p.textContent=fP((v-pV)/pV);p.style.cssText=pC((v-pV)/pV);}
+    const l=document.getElementById(prefix+'LY');if(l&&lV){l.textContent=fP((v-lV)/lV);l.style.cssText=pC((v-lV)/lV);}
+    const a=document.getElementById(prefix+'6');if(a&&a6){a.textContent=fP((v-a6)/a6);a.style.cssText=pC((v-a6)/a6);}
+  }
+  sc('fcC',vCon,uCon,priorVol,lyVol,avg6);
+  sc('fcB',vBase,uBase,priorVol,lyVol,avg6);
+  sc('fcO',vOpt,uOpt,priorVol,lyVol,avg6);
+  set('fcCMeth','Funded MTD + (COE w/Locks × '+(conv*100).toFixed(1)+'%)\nExcludes floating loans.');
+
+  // Signals
+  if(coeLocks&&coeIn){const r=coeLocks/coeIn;set('sg1V',(r*100).toFixed(0)+'%');document.getElementById('sg1V').style.color=r>=.75?'var(--green)':r>=.55?'var(--gold)':'var(--red)';set('sg1S',fM(coeLocks)+' of '+fM(coeIn)+' locked');document.getElementById('sg1B').style.width=Math.min(100,r*100).toFixed(0)+'%';}
+  if(locked){set('sg2V',fM(locked));document.getElementById('sg2V').style.color=locked>=30e6?'var(--teal)':'var(--warm)';set('sg2S',locked>=30e6?'Above $30M benchmark ✓':'Below $30M benchmark');document.getElementById('sg2B').style.width=Math.min(100,locked/40e6*100).toFixed(0)+'%';}
+  if(fundedCoe&&avg6){set('sg3V',fM(fundedCoe));set('sg3S',fP((fundedCoe-avg6)/avg6)+' vs 6-mo avg');document.getElementById('sg3B').style.width=Math.min(100,fundedCoe/avg6*75).toFixed(0)+'%';}
+  if(coeNext!=null){const MID_BENCH=7e6;const light=coeNext<3e6;const strong=coeNext>=10e6;set('sg4V',fM(coeNext));document.getElementById('sg4V').style.color=strong?'var(--green)':light?'var(--red)':'var(--teal)';set('sg4S',strong?'Ahead of mid-month avg ($7M)':light?'Below normal — watch lock velocity':'Normal mid-month pace (avg $7M)');document.getElementById('sg4B').style.width=Math.min(100,coeNext/15e6*100).toFixed(0)+'%';}
+
+  // History table
+  let htHtml='';
+  HIST.forEach((r,i)=>{
+    const prev=HIST[i-1];const mom=prev?(r.v-prev.v)/prev.v:null;
+    const ly=HIST.find(x=>x.mo===r.mo&&x.yr===r.yr-1);const yoy=ly?(r.u-ly.u)/ly.u:null;
+    htHtml+=`<tr><td>${r.m}</td><td>${r.u}</td><td>${fM(r.v)}</td><td>${fM(r.v/r.u,0)}</td>
+      <td class="${mom==null?'':mom>=.05?'tu':mom<=-.05?'td':'tf'}">${mom!=null?fP(mom):'—'}</td>
+      <td class="${yoy==null?'':yoy>=0?'tu':'td'}">${yoy!=null?fP(yoy):'—'}</td>
+      <td>${r.cL?fM(r.cL):'—'}</td><td>${r.cN?fM(r.cN):'—'}</td></tr>`;
+  });
+  const ytdRowsH=HIST.filter(r=>r.yr===yr&&r.mo<mo);
+  if(ytdRowsH.length){
+    const tU=ytdRowsH.reduce((a,r)=>a+r.u,0),tV=ytdRowsH.reduce((a,r)=>a+r.v,0);
+    const lyYtd=HIST.filter(r=>r.yr===yr-1&&r.mo<mo);
+    const lU=lyYtd.reduce((a,r)=>a+r.u,0),lV=lyYtd.reduce((a,r)=>a+r.v,0);
+    htHtml+=`<tr class="ytd-row"><td>YTD ${yr} (Jan–${ytdRowsH[ytdRowsH.length-1].m.split(' ')[0]})</td><td>${tU}</td><td>${fM(tV)}</td><td>${fM(tV/tU,0)}</td>
+      <td colspan="2" style="text-align:center">${lU>0?'+'+Math.round((tU-lU)/lU*100)+'% units · +'+Math.round((tV-lV)/lV*100)+'% vol vs prior YTD':'—'}</td><td>—</td><td>—</td></tr>`;
+  }
+  htHtml+=`<tr class="mtd-row"><td>${monthShort} ${yr} (MTD ${snapStr})</td><td>${unitsMTD}</td><td>${fM(volMTD)}</td>
+    <td>${unitsMTD>0?fM(volMTD/unitsMTD,0):'—'}</td><td>—</td><td>—</td>
+    <td>${coeLocks?fM(coeLocks):'—'}</td><td>${coeNext!=null?fM(coeNext):'—'}</td></tr>`;
+  html('histBody',htHtml);
+
+  // Insights
+  const lockR=coeLocks&&coeIn?coeLocks/coeIn:null;
+  set('i1T',lockR>=.78?'Pipeline Quality at Cycle High':lockR>=.6?'Pipeline Quality: Moderate':'Pipeline Signals');
+  html('i1B',lockR?`COE w/Locks coverage of <b>${(lockR*100).toFixed(0)}%</b> ${lockR>=.75?'is among the strongest in recent months. When this ratio exceeds 75%, pull-through to funded volume is consistently strong.':'is within normal range.'} The BD-adjusted model assigns a <b>${(conv*100).toFixed(1)}% conversion rate</b> to the locked COE pool — reflecting ${effRem} effective business days remaining${nHols>0?' with '+nHols+' holiday'+(nHols>1?'s':'')+' reducing capacity':' with no holidays interrupting the close cycle'}.`:'COE w/Locks data not available in this snapshot.');
+
+  const carry=coeNext;const MID_BENCH=7e6;
+  set('i2T',carry<3e6?'Next-Month Carry Building Slowly':carry>=10e6?'Next-Month Carry Ahead of Pace':'Next-Month Carry: On Track');
+  html('i2B',carry!=null?carry<3e6?`COE-next-month is <b>${fM(carry)}</b> at this stage — below the historical mid-month average of ~$7M. Most of the carry pipeline builds in the second half of the month, but this warrants watching. Focus on locking loans with next-month close dates this week.`:carry>=10e6?`COE-next-month carry of <b>${fM(carry)}</b> is above the historical mid-month average of ~$7M — a positive early signal. Carry pipelines typically build by $25M+ in the second half of the month; if this pace holds, next month is set up well.`:`COE-next-month carry of <b>${fM(carry)}</b> is tracking normally for this point in the month. The historical mid-month average is ~$7M; carry typically builds by $25M+ before month-end. Feb, Mar, and Apr all showed $7–9M at the same BD.`:'Next-month carry data not in snapshot.');
+
+  const vGrow=ytdPV>0?Math.round((ytdV-ytdPV)/ytdPV*100):null;
+  const uGrow=ytdPU>0?Math.round((ytdU-ytdPU)/ytdPU*100):null;
+  set('i3T',vGrow>=50?yr+' YTD Pace Is Exceptional':vGrow!=null?yr+' YTD Growth: '+(vGrow>=0?'+':'')+vGrow+'%':'YTD Production');
+  html('i3B',vGrow!=null?`Through the completed months of ${yr}, production is running <b>+${uGrow}% ahead in units</b> and <b>+${vGrow}% ahead in volume</b> versus the same period in ${yr-1}. If ${monthShort} closes at the base case of <b>${fM(vBase)}</b>, Q1+${monthShort} would reach <b>${fM(ytdV+vBase)}</b>.`:'Year-over-year comparison building as history accumulates.');
+
+  html('i4B',`The BD-adjusted model (r=0.66 across 10 months) scales conversion rates by effective closing days remaining. ${nHols>0?`<b>Note:</b> ${nHols} holiday${nHols>1?'s':''} reduce effective BD to ${effRem}, pulling the fitted conversion rate to <b>${(conv*100).toFixed(1)}%</b>.`:`This month has <b>no remaining holidays</b> — all ${effRem} BD are fully available, supporting <b>${(conv*100).toFixed(1)}% conversion</b>.`} Watch: <b>November and December</b> carry holiday proximity penalties beyond BD count — apply an additional 10–15% haircut in those months.`);
+
+  document.getElementById('dash').classList.remove('hidden');
+  window._lastSnap=s;
+  showSaveBar();
+}
+
+function processFile(f){
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const sn=wb.SheetNames.find(s=>s.toLowerCase().includes('production')||s.toLowerCase().includes('overview'))||wb.SheetNames[0];
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,cellDates:true,defval:null});
+      const dRows=[];
+
+      function isDateObj(v){ return v&&typeof v==='object'&&typeof v.getFullYear==='function'&&!isNaN(v.getTime()); }
+
+      function toDate(v){
+        // Case 1: already a JS Date object (what we see in the debug — "Wed May 22 2024 00:00:00 (object)")
+        if(isDateObj(v)) return new Date(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate()); // UTC getters prevent timezone off-by-one day
+        // Case 2: Excel serial number
+        if(typeof v==='number'&&v>44000&&v<48000){
+          const serial=v>59?v-1:v;
+          const d=new Date((serial-25569)*86400*1000);
+          return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+        }
+        // Case 3: string dates
+        if(typeof v==='string'){
+          const iso=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(v);
+          if(iso) return new Date(+iso[1],+iso[2]-1,+iso[3]);
+          const us=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/.exec(v);
+          if(us){const yr=+us[3]<100?2000+ +us[3]:+us[3];return new Date(yr,+us[1]-1,+us[2]);}
+        }
+        return null;
+      }
+
+      function numOrNull(v){if(v==null||v==='')return null;const n=parseFloat(v);return isNaN(n)?null:n;}
+
+      for(const row of rows){
+        if(!row||row[0]==null)continue;
+        const v0str=String(row[0]).trim();
+        if(v0str===''||v0str==='Date'||v0str.startsWith('Est.')||v0str==='Borrower')continue;
+        const vol=numOrNull(row[2]);
+        if(vol===null)continue;
+        const dt=toDate(row[0]);
+        if(!dt||dt.getFullYear()<2024||dt.getFullYear()>2030)continue;
+        dRows.push({date:dt,mo:dt.getMonth()+1,yr:dt.getFullYear(),day:dt.getDate(),
+          units:numOrNull(row[1]),volume:vol,
+          locked:numOrNull(row[3]),coeIn:numOrNull(row[4]),
+          fundedCoe:numOrNull(row[5]),coeLocks:numOrNull(row[6]),
+          coeNext:numOrNull(row[7])});
+      }
+      if(!dRows.length){
+        alert('No data rows found.\n\nSheet: "'+sn+'"\n\nNo rows with valid dates and volume in columns A–C were found. Confirm you are uploading Partners_Production_Tracking.xlsx.');
+        return;
+      }
+      const lat=dRows[dRows.length-1];
+      const sd=lat.date,mo=lat.mo,yr=lat.yr;
+      const totalBD=bdsInMonth(yr,mo);
+      const elBD=bdsElapsed(sd);
+      const remBD=bdsRemaining(sd);
+      const hols=holsRem(sd);
+      const nHols=hols.length;
+      const effRem=remBD-nHols;
+      const pctEl=elBD/totalBD;
+      // BD-adjusted conversion rate with late-month empirical correction
+      // Mid-month (effRem >= 6): linear BD-fitted formula (validated on 10 months)
+      // Late-month (effRem <= 5): empirical floors from actual late-month data
+      //   5BD→61%, 4BD→54%, 3BD→53%, 2BD→48%, 1BD→42%, 0BD→25%
+      const lateMonthConv=[0.25,0.42,0.48,0.53,0.54,0.61]; // index = effRem (0-5)
+      const conv = effRem<=5
+        ? lateMonthConv[Math.max(0,Math.min(5,effRem))]
+        : Math.min(1.15,Math.max(0.45,0.0812*effRem-0.0284));
+      // Late month: unlocked COE converts at lower rate (floating loans push out more at EOM)
+      const convU = effRem<=5 ? conv*0.38 : conv*(0.35/0.82);
+      const AS=520000;
+      const volMTD=lat.volume||0,unitsMTD=lat.units||0;
+      const locked=lat.locked||0,coeIn=lat.coeIn||0;
+      const fundedCoe=lat.fundedCoe||0,coeLocks=lat.coeLocks||0;
+      const coeNext=lat.coeNext;
+      const unlocked=Math.max(0,coeIn-coeLocks);
+      const nonCoe=Math.max(0,locked-coeIn);
+      const vCon=volMTD+coeLocks*conv;
+      const vBase=vCon+unlocked*convU;
+      const vOpt=vBase+nonCoe*0.15;
+      const uCon=Math.round(vCon/AS),uBase=Math.round(vBase/AS),uOpt=Math.round(vOpt/AS);
+      const prior=HIST.filter(r=>r.yr*12+r.mo<yr*12+mo);
+      const ly=HIST.find(r=>r.mo===mo&&r.yr===yr-1);
+      const rec6=prior.slice(-6);
+      const avg6=rec6.length?rec6.reduce((a,r)=>a+r.v,0)/rec6.length:0;
+      const ytdR=HIST.filter(r=>r.yr===yr&&r.mo<mo);
+      const ytdU=ytdR.reduce((a,r)=>a+r.u,0),ytdV=ytdR.reduce((a,r)=>a+r.v,0);
+      const lyYtd=HIST.filter(r=>r.yr===yr-1&&r.mo<mo);
+      const ytdPU=lyYtd.reduce((a,r)=>a+r.u,0),ytdPV=lyYtd.reduce((a,r)=>a+r.v,0);
+      const monthName=sd.toLocaleString('default',{month:'long'});
+      const monthShort=sd.toLocaleString('default',{month:'short'});
+      const snapStr=sd.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+      render({snapDate:sd,snapStr,month:monthName,monthShort,yr,mo,
+        unitsMTD,volMTD,locked,coeIn,fundedCoe,coeLocks,coeNext,
+        totalBD,elBD,remBD,effRem,nHols,pctEl,
+        vCon,vBase,vOpt,uCon,uBase,uOpt,conv,
+        priorVol:prior.length?prior[prior.length-1].v:null,
+        lyVol:ly?ly.v:null,avg6,
+        ytdU,ytdV,ytdPU,ytdPV});
+
+      const box=document.getElementById('dropBox');
+      box.classList.add('has-file');
+      document.querySelector('.upload-icon').textContent='✓';
+      set('uploadTitle',f.name+' loaded');
+      set('uploadSub',snapStr+' · '+dRows.length+' daily observations');
+      document.querySelector('.upload-hint').style.display='none';
+    }catch(err){alert('Error: '+err.message);console.error(err);}
+  };
+  r.readAsArrayBuffer(f);
+}
+
+const box=document.getElementById('dropBox');
+const fi=document.getElementById('fileIn');
+box.addEventListener('dragover',e=>{e.preventDefault();box.classList.add('drag-over');});
+box.addEventListener('dragleave',()=>box.classList.remove('drag-over'));
+box.addEventListener('drop',e=>{e.preventDefault();box.classList.remove('drag-over');if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);});
+fi.addEventListener('change',e=>{if(e.target.files[0])processFile(e.target.files[0]);});
+// Refresh input (slim bar version)
+const fi2=document.getElementById('fileIn2');
+if(fi2) fi2.addEventListener('change',e=>{if(e.target.files[0]) processFile(e.target.files[0]);});
+
+// ── TAB SWITCHING ──────────────────────────────────────────────────
+function switchTab(tab){
+  const isDash=tab==='dashboard';
+  document.getElementById('tabDash').classList.toggle('active',isDash);
+  document.getElementById('tabHist').classList.toggle('active',!isDash);
+  document.getElementById('dash').classList.toggle('hidden',!isDash);
+  document.getElementById('uploadZone').classList.toggle('hidden',!isDash);
+  const sb=document.getElementById('saveBar');
+  if(sb) sb.classList.toggle('hidden',!isDash||!window._lastSnap);
+  document.getElementById('histPage').classList.toggle('hidden',isDash);
+  if(!isDash){ loadAndRenderHistory(); }
+}
+
+// ── SNAPSHOT COUNT ─────────────────────────────────────────────────
+function updateHistCount(){
+  const n=(window._remoteSnaps||[]).length;
+  set('histCount',String(n));
+}
+
+// ── SAVE SNAPSHOT TO FIREBASE ──────────────────────────────────────
+async function saveSnapshot(){
+  if(!window._lastSnap||!window._fb){return;}
+  const s=window._lastSnap;
+  const btn=document.getElementById('btnSave');
+
+  // Duplicate check against already-loaded snaps
+  if((window._remoteSnaps||[]).find(x=>x.snapStr===s.snapStr)){
+    btn.textContent='✓ Already saved';btn.classList.add('saved');
+    setTimeout(()=>{btn.textContent='⬇  Save to History';btn.classList.remove('saved');},2000);
+    return;
+  }
+
+  btn.textContent='Saving…';btn.disabled=true;
+  try{
+    const payload={
+      snapStr:s.snapStr, month:s.month, monthShort:s.monthShort, yr:s.yr, mo:s.mo,
+      unitsMTD:s.unitsMTD, volMTD:s.volMTD, locked:s.locked||0, coeIn:s.coeIn||0,
+      coeLocks:s.coeLocks||0, coeNext:s.coeNext||0, fundedCoe:s.fundedCoe||0,
+      totalBD:s.totalBD, elBD:s.elBD, remBD:s.remBD, effRem:s.effRem,
+      nHols:s.nHols, pctEl:s.pctEl, vCon:s.vCon, vBase:s.vBase, vOpt:s.vOpt,
+      uBase:s.uBase, conv:s.conv
+    };
+    const ref=await window._fb.save(payload);
+    // Add to local cache with the new Firestore doc ID
+    window._remoteSnaps=window._remoteSnaps||[];
+    window._remoteSnaps.push({_id:ref.id,...payload});
+    updateHistCount();
+    btn.textContent='✓ Saved!';btn.classList.add('saved');
+    setTimeout(()=>{btn.textContent='⬇  Save to History';btn.classList.remove('saved');btn.disabled=false;},2500);
+  }catch(err){
+    console.error(err);
+    btn.textContent='⚠ Save failed — check console';btn.disabled=false;
+    setTimeout(()=>{btn.textContent='⬇  Save to History';},3000);
+  }
+}
+
+// ── DELETE SNAPSHOT FROM FIREBASE ─────────────────────────────────
+async function deleteSnapshot(idx){
+  if(!window._fb||!window._remoteSnaps)return;
+  const snap=window._remoteSnaps[idx];
+  if(!snap)return;
+  if(!confirm('Remove this snapshot from shared history?'))return;
+  try{
+    await window._fb.remove(snap._id);
+    window._remoteSnaps.splice(idx,1);
+    updateHistCount();
+    renderHistoryPage();
+  }catch(err){
+    alert('Delete failed: '+err.message);
+  }
+}
+
+// ── LOAD FROM FIREBASE THEN RENDER ────────────────────────────────
+async function loadAndRenderHistory(){
+  if(!window._fb)return;
+  // Show loading state
+  const grid=document.getElementById('snapGrid');
+  const empty=document.getElementById('histEmpty');
+  empty.classList.remove('hidden');
+  empty.innerHTML='<div class="he-icon">⏳</div><h3>Loading snapshots…</h3><p>Fetching from Firebase</p>';
+  grid.classList.add('hidden');
+  try{
+    const snaps=await window._fb.loadAll();
+    window._remoteSnaps=snaps;
+    updateHistCount();
+    renderHistoryPage();
+  }catch(err){
+    empty.innerHTML=`<div class="he-icon">⚠️</div><h3>Could not load snapshots</h3><p>${err.message}<br><br>Check your Firestore rules allow reads.</p>`;
+    console.error(err);
+  }
+}
+
+// ── BUILD A CARD HTML STRING ──────────────────────────────────────
+function buildCard(s, globalIdx, prevSnap){
+  const lockPct=s.coeLocks&&s.coeIn?Math.round(s.coeLocks/s.coeIn*100):null;
+  const lockCls=lockPct>=75?'green':lockPct>=55?'teal':'';
+  const pctThru=Math.round((s.pctEl||0)*100);
+  const convPct=s.conv?(s.conv*100).toFixed(1)+'%':'—';
+
+  // MoM vs adjacent snapshot
+  let momHtml='';
+  if(prevSnap&&prevSnap.vBase&&s.vBase){
+    const diff=(s.vBase-prevSnap.vBase)/prevSnap.vBase;
+    const uDiff=(s.uBase||0)-(prevSnap.uBase||0);
+    momHtml=`<div class="snap-note">vs prior: <b style="color:${diff>=0?'var(--green)':'var(--red)'};">${fP(diff)}</b> &nbsp;·&nbsp; ${uDiff>=0?'+':''}${uDiff} units</div>`;
+  }
+
+  // Accuracy
+  const hasActual=s.actualVol>0;
+  const accuracy=hasActual?(s.actualVol-s.vBase)/s.vBase:null;
+  const accColor=accuracy==null?'':Math.abs(accuracy)<=0.08?'var(--green)':Math.abs(accuracy)<=0.18?'var(--gold)':'var(--red)';
+  const accText=accuracy==null?'':(accuracy>=0?'+':'')+fP(accuracy);
+
+  // Badges
+  const partialBadge=s.partial?'<span style="font-size:9px;font-weight:700;background:#fff3e0;color:#9a4f00;padding:1px 6px;border-radius:8px;margin-left:5px;">⚠ Partial</span>':'';
+  const histBadge=s._historical&&!s.partial?'<span style="font-size:9px;font-weight:700;background:var(--teal-light);color:var(--teal-dark);padding:1px 6px;border-radius:8px;margin-left:5px;">Full data</span>':'';
+
+  return `<div class="snap-card${s.partial?' partial-card':''}" onclick="openModal(${globalIdx})">
+    <div class="snap-card-hdr">
+      ${!s._historical?`<button class="snap-del" onclick="event.stopPropagation();deleteSnapshot(${globalIdx})" title="Remove">×</button>`:''}
+      <div class="sch">
+        <div class="sch-date">${s.snapStr}${partialBadge}${histBadge}</div>
+        <div class="sch-bd">BD ${s.elBD}/${s.totalBD} &nbsp;·&nbsp; ${pctThru}% thru${s.conv?' &nbsp;·&nbsp; conv '+convPct:''}</div>
+      </div>
+    </div>
+    <div class="snap-body">
+      <div class="snap-row"><span class="sr-lbl">Base Forecast</span><span class="sr-val teal">${fM(s.vBase)} &nbsp;·&nbsp; ~${s.uBase||'—'} units</span></div>
+      <div class="snap-row"><span class="sr-lbl">Funded MTD</span><span class="sr-val">${fM(s.volMTD)}</span></div>
+      ${lockPct!=null?`<div class="snap-row"><span class="sr-lbl">Lock Coverage</span><span class="sr-val ${lockCls}">${lockPct}%</span></div>`:''}
+      ${hasActual?`<div class="snap-row"><span class="sr-lbl">Actual Final</span><span class="sr-val">${fM(s.actualVol)} &nbsp;·&nbsp; ${s.actualUnits} units</span></div>`:''}
+      ${hasActual&&accuracy!=null?`<div class="snap-row"><span class="sr-lbl">Accuracy</span><span class="sr-val" style="color:${accColor};">${accText}</span></div>`:''}
+      ${momHtml}
+      <div class="snap-click-hint">Click for full detail →</div>
+    </div>
+  </div>`;
+}
+
+// ── RENDER HISTORY PAGE FROM CACHE ────────────────────────────────
+function renderHistoryPage(){
+  const allSnaps=window._remoteSnaps||[];
+  const trend=document.getElementById('trendSection');
+
+  // Split into historical (seeded) and live (user-saved)
+  const historical=allSnaps.filter(s=>s._historical);
+  const live=allSnaps.filter(s=>!s._historical);
+
+  trend.classList.toggle('hidden', allSnaps.length===0);
+  if(allSnaps.length) drawTrendBars();
+
+  // ── Historical grid ──
+  const histGrid=document.getElementById('histGrid');
+  if(historical.length){
+    let hHtml='';
+    historical.forEach((s,i)=>{
+      const globalIdx=allSnaps.indexOf(s);
+      const prev=i>0?historical[i-1]:null;
+      hHtml+=buildCard(s, globalIdx, prev);
+    });
+    histGrid.innerHTML=hHtml;
+  } else {
+    histGrid.innerHTML='<p style="font-size:12px;color:var(--text-muted);padding:16px 0;">Historical snapshots loading…</p>';
+  }
+
+  // ── Live grid ──
+  const liveGrid=document.getElementById('liveGrid');
+  const liveEmpty=document.getElementById('liveEmpty');
+  if(live.length){
+    liveEmpty.classList.add('hidden');
+    liveGrid.classList.remove('hidden');
+    let lHtml='';
+    live.forEach((s,i)=>{
+      const globalIdx=allSnaps.indexOf(s);
+      const prev=i>0?live[i-1]:null;
+      lHtml+=buildCard(s, globalIdx, prev);
+    });
+    liveGrid.innerHTML=lHtml;
+  } else {
+    liveEmpty.classList.remove('hidden');
+    liveGrid.classList.add('hidden');
+  }
+}
+
+// ── SHOW SAVE BAR AFTER FRESH FILE LOAD ──────────────────────────
+function showSaveBar(){
+  // Switch back to dropbox view (in case we were showing refresh bar)
+  document.getElementById('dropBox').classList.remove('hidden');
+  const rb=document.getElementById('refreshBar');
+  if(rb) rb.classList.add('hidden');
+  // Show save bar
+  const bar=document.getElementById('saveBar');
+  if(bar){bar.classList.remove('hidden');
+    const btn=document.getElementById('btnSave');
+    btn.textContent='⬇  Save to History';btn.classList.remove('saved');btn.disabled=false;
+  }
+}
+
+// Init count from any already-loaded remote snaps
+updateHistCount();
+
+// ── MODAL OPEN / CLOSE ────────────────────────────────────────────
+function openModal(idx){
+  const snaps=window._remoteSnaps||[];
+  const s=snaps[idx];
+  if(!s)return;
+
+  // Header
+  document.getElementById('mDate').textContent=s.snapStr;
+  document.getElementById('mSub').textContent=
+    `${s.month} ${s.yr}  ·  BD ${s.elBD} of ${s.totalBD}  ·  ${Math.round((s.pctEl||0)*100)}% through month`;
+
+  // Scenarios
+  document.getElementById('mCon').textContent=fM(s.vCon);
+  document.getElementById('mConU').textContent='~'+(Math.round((s.vCon||0)/520000))+' units';
+  document.getElementById('mBase').textContent=fM(s.vBase);
+  document.getElementById('mBaseU').textContent='~'+(s.uBase||'—')+' units';
+  document.getElementById('mOpt').textContent=fM(s.vOpt);
+  document.getElementById('mOptU').textContent='~'+(Math.round((s.vOpt||0)/520000))+' units';
+
+  // BD position
+  document.getElementById('mElBD').textContent=s.elBD+' of '+s.totalBD;
+  document.getElementById('mElBDSub').textContent=Math.round((s.pctEl||0)*100)+'% elapsed';
+  document.getElementById('mRemBD').textContent=s.remBD+' BD';
+  document.getElementById('mRemBDSub').textContent=s.nHols>0?s.nHols+' holiday'+(s.nHols>1?'s':'')+' in window':'No holidays remaining';
+  document.getElementById('mConv').textContent=s.conv?(s.conv*100).toFixed(1)+'%':'—';
+  document.getElementById('mConvSub').textContent='eff BD remaining: '+s.effRem;
+
+  // Pipeline
+  document.getElementById('mFunded').textContent=fM(s.volMTD);
+  document.getElementById('mFundedU').textContent=(s.unitsMTD||0)+' units closed';
+  document.getElementById('mLocked').textContent=fM(s.locked);
+  const lockPct=s.coeLocks&&s.coeIn?Math.round(s.coeLocks/s.coeIn*100):null;
+  const lEl=document.getElementById('mLockPct');
+  lEl.textContent=lockPct!=null?lockPct+'%':'—';
+  lEl.className='mk-val'+(lockPct>=75?' green':lockPct>=55?' teal':'');
+  document.getElementById('mLockPctSub').textContent=lockPct!=null?(lockPct>=75?'Strong — above 75% threshold':lockPct>=55?'Moderate coverage':'Below 55% — elevated fallout risk'):'';
+  document.getElementById('mCoeIn').textContent=fM(s.coeIn);
+  document.getElementById('mCoeLocks').textContent=fM(s.coeLocks);
+  document.getElementById('mFCoe').textContent=fM(s.fundedCoe);
+  document.getElementById('mCoeNext').textContent=fM(s.coeNext);
+
+  // Benchmarks — compare to prior snapshot and HIST averages
+  const HIST_AVG6=29900000; // rolling 6-mo avg at time of model build
+  const APR25=24685408;     // same month LY
+  const prior=snaps[idx-1];
+  const vsItems=[
+    {lbl:'vs prior snapshot', val:prior&&s.vBase&&prior.vBase?(s.vBase-prior.vBase)/prior.vBase:null},
+    {lbl:'vs 6-month avg ($29.9M)', val:HIST_AVG6>0?(s.vBase-HIST_AVG6)/HIST_AVG6:null},
+    {lbl:'Run-rate check', val:s.elBD&&s.totalBD&&s.volMTD?((s.volMTD/s.elBD*s.totalBD)):null, isDollar:true},
+  ];
+  let vsHtml='';
+  vsItems.forEach(v=>{
+    if(v.isDollar){
+      vsHtml+=`<div class="modal-vs-item"><div class="mvi-lbl">${v.lbl}</div><div class="mvi-val" style="color:var(--text-muted)">${v.val?fM(v.val):'—'}</div></div>`;
+    } else {
+      const col=v.val==null?'var(--text-muted)':v.val>=0.02?'var(--green)':v.val<=-0.02?'var(--red)':'var(--text-muted)';
+      vsHtml+=`<div class="modal-vs-item"><div class="mvi-lbl">${v.lbl}</div><div class="mvi-val" style="color:${col}">${v.val!=null?fP(v.val):'—'}</div></div>`;
+    }
+  });
+  document.getElementById('mVsGrid').innerHTML=vsHtml;
+
+  // Actual result section
+  const actSection = document.getElementById('mActualSection');
+  if(s.actualVol > 0){
+    actSection.classList.remove('hidden');
+    document.getElementById('mActualVol').textContent  = fM(s.actualVol);
+    document.getElementById('mActualUnits').textContent = s.actualUnits + ' units funded';
+    document.getElementById('mForecastWas').textContent = fM(s.vBase);
+    const acc = (s.actualVol - s.vBase) / s.vBase;  // neg = we over-forecast
+    const accEl = document.getElementById('mAccuracy');
+    accEl.textContent = fP(acc) + ' vs actual';
+    accEl.style.color = Math.abs(acc)<=0.08 ? 'var(--green)' : Math.abs(acc)<=0.18 ? 'var(--gold)' : 'var(--red)';
+    const conRange = s.vCon <= s.actualVol && s.actualVol <= s.vOpt;
+    document.getElementById('mAccuracySub').textContent = conRange
+      ? 'Actual within forecast range ✓'
+      : s.actualVol < s.vCon
+        ? 'Actual fell below conservative floor'
+        : 'Actual above optimistic ceiling';
+  } else {
+    actSection.classList.add('hidden');
+  }
+
+  // Delete button wired to this index
+  document.getElementById('mDelBtn').onclick=()=>{ closeModal(); deleteSnapshot(idx); };
+
+  document.getElementById('snapModal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('snapModal').classList.add('hidden');
+  document.body.style.overflow='';
+}
+
+// Keyboard close
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+// ── RENDER DASHBOARD FROM A SAVED SNAPSHOT OBJECT ────────────────
+function renderFromSnapshot(s){
+  // Reconstruct the snap object that render() expects from stored fields
+  // All computed values were stored at save time — just pass them through
+  const snapObj = {
+    snapDate:   new Date(s.yr, s.mo-1, 15), // approximate — for BD fns not needed here
+    snapStr:    s.snapStr,
+    month:      s.month,
+    monthShort: s.monthShort,
+    yr:         s.yr,
+    mo:         s.mo,
+    unitsMTD:   s.unitsMTD   || 0,
+    volMTD:     s.volMTD     || 0,
+    locked:     s.locked     || 0,
+    coeIn:      s.coeIn      || 0,
+    fundedCoe:  s.fundedCoe  || 0,
+    coeLocks:   s.coeLocks   || 0,
+    coeNext:    s.coeNext    || 0,
+    totalBD:    s.totalBD    || 22,
+    elBD:       s.elBD       || 11,
+    remBD:      s.remBD      || 11,
+    effRem:     s.effRem     || 11,
+    nHols:      s.nHols      || 0,
+    pctEl:      s.pctEl      || 0.5,
+    vCon:       s.vCon       || 0,
+    vBase:      s.vBase      || 0,
+    vOpt:       s.vOpt       || 0,
+    uCon:       Math.round((s.vCon||0)/520000),
+    uBase:      s.uBase      || 0,
+    uOpt:       Math.round((s.vOpt||0)/520000),
+    conv:       s.conv       || 0.82,
+    priorVol:   null,
+    lyVol:      null,
+    avg6:       0,
+    ytdU:       0, ytdV: 0, ytdPU: 0, ytdPV: 0,
+  };
+
+  // Compute context from HIST for comparisons
+  const prior = HIST.filter(r => r.yr*12+r.mo < s.yr*12+s.mo);
+  const ly = HIST.find(r => r.mo===s.mo && r.yr===s.yr-1);
+  const rec6 = prior.slice(-6);
+  snapObj.priorVol = prior.length ? prior[prior.length-1].v : null;
+  snapObj.lyVol    = ly ? ly.v : null;
+  snapObj.avg6     = rec6.length ? rec6.reduce((a,r)=>a+r.v,0)/rec6.length : 0;
+
+  const ytdR  = HIST.filter(r=>r.yr===s.yr  &&r.mo<s.mo);
+  const lyYtd = HIST.filter(r=>r.yr===s.yr-1&&r.mo<s.mo);
+  snapObj.ytdU  = ytdR.reduce((a,r)=>a+r.u,0);
+  snapObj.ytdV  = ytdR.reduce((a,r)=>a+r.v,0);
+  snapObj.ytdPU = lyYtd.reduce((a,r)=>a+r.u,0);
+  snapObj.ytdPV = lyYtd.reduce((a,r)=>a+r.v,0);
+
+  render(snapObj);
+
+  // Switch upload zone to slim refresh bar
+  document.getElementById('dropBox').classList.add('hidden');
+  const rb = document.getElementById('refreshBar');
+  rb.classList.remove('hidden');
+  document.getElementById('refreshDate').textContent = s.snapStr;
+  document.getElementById('refreshLabel').textContent = 'Showing saved snapshot —';
+
+  // Hide save bar — this came from storage, not a fresh file
+  const sb = document.getElementById('saveBar');
+  if(sb) sb.classList.add('hidden');
+  window._lastSnap = null; // don't offer save on auto-loaded snap
+}
+
+// ── TREND METRIC SWITCHER ──────────────────────────────────────────
+window._trendMetric = 'paired';
+function setTrendMetric(metric, btn){
+  window._trendMetric = metric;
+  document.querySelectorAll('.trend-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  drawTrendBars();
+}
+
+const TREND_META = {
+  vBase:     { label:'Base Case Forecast', fmt: v=>fM(v,1),      color:'var(--teal)',  desc:'BD-adjusted base case projection at time of snapshot' },
+  volMTD:    { label:'Volume Funded MTD',  fmt: v=>fM(v,1),      color:'var(--green)', desc:'Cumulative funded volume through the snapshot date' },
+  locked:    { label:'Locked Pipeline',    fmt: v=>fM(v,1),       color:'var(--navy)',  desc:'Total active locked pipeline across all close dates' },
+  lockPct:   { label:'COE Lock Coverage',  fmt: v=>Math.round(v)+'%', color:'#E8B84B', desc:'% of COE in month that was actively locked at snapshot time' },
+  coeNext:   { label:'COE Next Month',     fmt: v=>fM(v,1),       color:'var(--warm)',  desc:'Forward carry pipeline for the following month' },
+  actualVol: { label:'Actual Final Volume',fmt: v=>v>0?fM(v,1):'—', color:'var(--green)', desc:'Actual funded volume at month end (where known)' },
+  paired:    { label:'Forecast vs Actual',  fmt: v=>fM(v,1), color:'var(--teal)', desc:'BD-adjusted base case forecast vs actual funded volume' },
+};
+
+function drawTrendBars(){
+  const allSnaps = window._remoteSnaps || [];
+  const metric = window._trendMetric || 'paired';
+  if(!allSnaps.length) return;
+
+  const CHART_H = 110; // max bar height in px — fixed so tabs never move
+  const isPaired = metric === 'paired';
+
+  // Compute values
+  function getVal(s, m){
+    if(m === 'lockPct') return (s.coeLocks && s.coeIn) ? Math.round(s.coeLocks/s.coeIn*100) : null;
+    if(m === 'actualVol') return (s.actualVol > 0) ? s.actualVol : null;
+    return s[m] > 0 ? s[m] : null;
+  }
+
+  let maxVal;
+  if(isPaired){
+    const allVals = allSnaps.flatMap(s => [s.vBase||0, s.actualVol||0]);
+    maxVal = Math.max(...allVals, 1);
+  } else {
+    const vals = allSnaps.map(s => getVal(s, metric) || 0);
+    maxVal = Math.max(...vals, 1);
+  }
+
+  const meta = TREND_META[metric] || TREND_META['vBase'];
+
+  let html = '';
+  allSnaps.forEach((s, i) => {
+    const isLive = !s._historical;
+    const isNewest = i === allSnaps.length - 1;
+    const dayNum = s.snapStr ? (s.snapStr.match(/\d+/) || [''])[0] : '';
+
+    if(isPaired){
+      const hForecast = Math.max(3, Math.round((s.vBase||0) / maxVal * CHART_H));
+      const hActual   = s.actualVol > 0 ? Math.max(3, Math.round(s.actualVol / maxVal * CHART_H)) : 0;
+      const fColor = isLive ? 'var(--gold)' : s.partial ? '#c87941' : 'var(--teal)';
+      const fOpacity = isNewest ? '1' : '0.65';
+
+      // Accuracy color on the actual bar
+      let aColor = 'var(--green)';
+      if(s.actualVol && s.vBase){
+        const acc = Math.abs((s.actualVol - s.vBase) / s.vBase);
+        aColor = acc <= 0.08 ? 'var(--green)' : acc <= 0.18 ? '#c8922a' : 'var(--red)';
+      }
+
+      const titleForecast = s.snapStr + ': Forecast ' + fM(s.vBase);
+      const titleActual   = s.actualVol > 0 ? ' | Actual ' + fM(s.actualVol) : ' | Actual TBD';
+      const valLabel = s.actualVol > 0
+        ? `<div class="trend-val" style="color:var(--teal-dark);">${fM(s.vBase,0)}</div>
+           <div class="trend-val-pair" style="color:${aColor};">${fM(s.actualVol,0)}</div>`
+        : `<div class="trend-val">${fM(s.vBase,0)}</div>
+           <div class="trend-val-pair" style="color:var(--text-light);">TBD</div>`;
+
+      html += `<div class="trend-bar-wrap" title="${titleForecast}${titleActual}">
+        ${valLabel}
+        <div class="trend-group">
+          <div class="trend-bar trend-bar-forecast" style="height:${hForecast}px;background:${fColor};opacity:${fOpacity};" title="Forecast: ${fM(s.vBase)}"></div>
+          ${hActual > 0
+            ? `<div class="trend-bar trend-bar-actual" style="height:${hActual}px;background:${aColor};opacity:0.85;" title="Actual: ${fM(s.actualVol)}"></div>`
+            : `<div class="trend-bar" style="height:6px;background:var(--border);opacity:0.5;flex:1;"></div>`
+          }
+        </div>
+        <div class="trend-label">${s.monthShort||''} ${String(s.yr||'').slice(2)}<br>${dayNum}</div>
+      </div>`;
+
+    } else {
+      // Single metric mode
+      const v = getVal(s, metric);
+      const h = v == null ? 3 : Math.max(3, Math.round(v / maxVal * CHART_H));
+      const bg = isLive ? 'var(--gold)' : s.partial ? '#c87941' : meta.color;
+      const opacity = isNewest ? '1' : isLive ? '0.85' : '0.6';
+      const nullStyle = v == null ? 'background:var(--border);opacity:0.3;' : '';
+
+      html += `<div class="trend-bar-wrap" title="${s.snapStr}: ${v!=null ? meta.fmt(v) : 'No data'}${s.partial?' (partial)':''}">
+        <div class="trend-val" style="${v==null?'color:var(--text-light);':''}">${v != null ? meta.fmt(v) : '—'}</div>
+        <div class="trend-group">
+          <div class="trend-bar trend-bar-single" style="height:${h}px;background:${bg};opacity:${opacity};${nullStyle}"></div>
+        </div>
+        <div class="trend-label">${s.monthShort||''} ${String(s.yr||'').slice(2)}<br>${dayNum}</div>
+      </div>`;
+    }
+  });
+
+  document.getElementById('trendBars').innerHTML = html;
+
+  // Legend / subtitle
+  const subtitle = document.getElementById('trendSubtitle');
+  if(isPaired){
+    subtitle.innerHTML =
+      'BD-adjusted base case forecast vs actual funded volume &nbsp;·&nbsp; ' +
+      '<span style="color:var(--teal);font-weight:600;">■</span> Forecast &nbsp; ' +
+      '<span style="color:var(--green);font-weight:600;">■</span> Actual &nbsp; ' +
+      '<span style="color:#c8922a;font-weight:600;">■</span> Partial data &nbsp; ' +
+      '<span style="color:var(--gold);font-weight:600;">■</span> Live snapshots';
+  } else {
+    subtitle.innerHTML =
+      meta.desc + ' &nbsp;·&nbsp; ' +
+      '<span style="color:var(--teal);font-weight:600;">■</span> Full historical &nbsp; ' +
+      '<span style="color:#c87941;font-weight:600;">■</span> Partial data &nbsp; ' +
+      '<span style="color:var(--gold);font-weight:600;">■</span> Live snapshots';
+  }
+}
+
+// ── EXPOSE TO GLOBAL SCOPE (called from onclick handlers) ──────────
+window.switchTab        = switchTab;
+window.saveSnapshot     = saveSnapshot;
+window.deleteSnapshot   = deleteSnapshot;
+window.renderHistoryPage= renderHistoryPage;
+window.showSaveBar      = showSaveBar;
+window.updateHistCount  = updateHistCount;
+window.openModal        = openModal;
+window.closeModal       = closeModal;
+window.setTrendMetric   = setTrendMetric;
+window.renderFromSnapshot = renderFromSnapshot;
+</script>
+</body>
+</html>
